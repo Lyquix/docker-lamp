@@ -309,7 +309,7 @@ REPLACE="['auth_type'] = 'config';\n\\\$cfg['Servers'][\\\$i]['user'] = 'dbuser'
 perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
 printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n";
 
-#Search-Replace DB
+# Search-Replace DB
 cd /var/www/html
 curl -L https://github.com/interconnectit/Search-Replace-DB/archive/refs/tags/3.1.zip --output srdb.zip
 unzip srdb.zip
@@ -318,5 +318,9 @@ rm srdb.zip
 cd srdb
 sed -i '196s/()/("", "dbuser", "dbpassword", "localhost", "3306", "", "")/' index.php
 printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n";
+
+# Initial file permissions
+chown -R www-data:www-data /srv/www
+chmod -R g+w,o+w /srv/www
 
 exit

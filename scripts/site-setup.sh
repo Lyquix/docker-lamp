@@ -40,6 +40,10 @@ printf "$VIRTUALHOST" > /etc/apache2/sites-available/$localdomain.conf
 mkdir -p /srv/www/$proddomain/public_html
 chown -R www-data:www-data /srv/www/$proddomain
 
+# Update permissions
+chown -R www-data:www-data /srv/www/$proddomain
+chmod -R g+w,o+w /srv/www/$proddomain
+
 # Enable sites
 a2ensite $localdomain
 service apache2 reload
