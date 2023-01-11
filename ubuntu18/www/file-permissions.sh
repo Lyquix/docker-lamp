@@ -29,14 +29,14 @@ cd /srv/www/
 if [[ "$fixall" == "Y" ]]; then
 	printf "Updating file permissions for all sites, please wait...\n"
 	chown -R www-data:www-data *
-	chmod -R g+w,o+w */public_html
+	chmod -R g+w,o+w *
 	find */public_html -type d -exec chmod g+ws,o+ws {} \;
 else
 	printf "Please select folder:\n"
 	select dir in */; do test -n "$dir" && break; echo ">>> Invalid Selection"; done
 	printf "Updating file permissions for /srv/www/$dir...\n"
 	chown -R www-data:www-data $dir
-	chmod -R g+w,o+w $dir/public_html
+	chmod -R g+w,o+w $dir
 	find $dir/public_html -type d -exec chmod g+ws,o+ws {} \;
 fi
 
