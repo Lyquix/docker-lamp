@@ -20,6 +20,7 @@ mkdir ubuntu18/sites-available
 mkdir ubuntu18/www
 docker build . -t ubuntu18 -f ubuntu18/Dockerfile
 docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu18 ubuntu18
+docker stop ubuntu18
 printf "Done\n"
 
 printf "Ubuntu 20.04 container...\n"
@@ -28,6 +29,7 @@ mkdir ubuntu20/sites-available
 mkdir ubuntu20/www
 docker build . -t ubuntu20 -f ubuntu20/Dockerfile
 docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu20 ubuntu20
+docker stop ubuntu20
 printf "Done\n"
 
 cd ${CURRDIR}
