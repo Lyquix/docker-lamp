@@ -23,7 +23,7 @@ do
 	cp scripts/site-setup.sh ubuntu$COUNTER/www
 	cp scripts/file-permissions.sh ubuntu$COUNTER/www
 	docker build . -t ubuntu$COUNTER -f ubuntu$COUNTER/Dockerfile
-	docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
+	docker run -p 80:80 -v ${PWD}/ubuntu$COUNTER/sites-available:/etc/apache2/sites-available -v ${PWD}/ubuntu$COUNTER/www:/srv/www/ -v ${PWD}/ubuntu$COUNTER/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
 	docker stop ubuntu$COUNTER
 	printf "Done\n"
 done
