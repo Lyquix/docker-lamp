@@ -14,23 +14,19 @@ printf $DIVIDER
 chmod +x scripts/*.sh
 
 # Build containers
-printf "Ubuntu 18.04 container...\n"
-mkdir ubuntu18/mysql
-mkdir ubuntu18/sites-available
-mkdir ubuntu18/www
-docker build . -t ubuntu18 -f ubuntu18/Dockerfile
-docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu18 ubuntu18
-docker stop ubuntu18
-printf "Done\n"
-
-printf "Ubuntu 20.04 container...\n"
-mkdir ubuntu20/mysql
-mkdir ubuntu20/sites-available
-mkdir ubuntu20/www
-docker build . -t ubuntu20 -f ubuntu20/Dockerfile
-docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu20 ubuntu20
-docker stop ubuntu20
-printf "Done\n"
+for COUNTER in 18 20
+do
+	printf "Ubuntu $COUNTER.04 container...\n"
+	mkdir ubuntu$COUNTER/mysql
+	mkdir ubuntu$COUNTER/sites-available
+	mkdir ubuntu$COUNTER/www
+	cp scripts/site-setup.sh ubuntu$COUNTER/www
+	cp scripts/file-permissions.sh ubuntu$COUNTER/www
+	docker build . -t ubuntu$COUNTER -f ubuntu$COUNTER/Dockerfile
+	docker run -p 80:80 -v ${PWD}/sites-available:/etc/apache2/sites-available -v ${PWD}/www:/srv/www/ -v ${PWD}/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
+	docker stop ubuntu$COUNTER
+	printf "Done\n"
+done
 
 cd ${CURRDIR}
 

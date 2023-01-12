@@ -14,7 +14,7 @@ Windows Subsystem for Linux
 2.  Restart Windows
 3.  Open CMD as Administrator
 
-*   Set future WSL installations to Version 2  
+*   Set future WSL installations to Version 2
     `wsl --set-default-version 2`
 
 4.  Install [Ubuntu](https://www.microsoft.com/store/productId/9PDXGNCFSCZV) from the Microsoft Store
@@ -24,19 +24,19 @@ Windows Subsystem for Linux
     *   UNIX username: `ubuntu`
     *   Password: `ubuntu`
     *   Retype password: `ubuntu`
-*   Create the Docker folder  
+*   Create the Docker folder
     `mkdir /home/ubuntu/Docker`
 
 6.  Open CMD as Administrator
 
-*   Make sure Ubuntu is running on WSL version 2  
+*   Make sure Ubuntu is running on WSL version 2
     `wsl --set-version Ubuntu 2`
-*   Make sure Ubuntu is set as the default distribution  
+*   Make sure Ubuntu is set as the default distribution
     `wsl --set-default Ubuntu`
-*   To check that Ubuntu is the default distro and that it's running on WSL 2 use  
+*   To check that Ubuntu is the default distro and that it's running on WSL 2 use
     `wsl -l -v`
-*   Create a symbolic link from the Documents folder to the Docker folder in Ubuntu  
-    `cd %userprofile%\Documents`  
+*   Create a symbolic link from the Documents folder to the Docker folder in Ubuntu
+    `cd %userprofile%\Documents`
     `mklink /d Docker \\wsl.localhost\Ubuntu\home\ubuntu\Docker`
 
 7.  You can close CMD now
@@ -44,15 +44,15 @@ Windows Subsystem for Linux
 
 Notes:
 
-*   You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window:  
+*   You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window:
     `\\wsl.localhost\Ubuntu`
-*   If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command:  
+*   If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command:
     `wsl –unregister Ubuntu`
 
 Docker Desktop for Windows
 --------------------------
 
-7.  Install [Docker Desktop on Windows](https://desktop.docker.com/win/main/amd64/Docker%2520Desktop%2520Installer.exe) 
+7.  Install [Docker Desktop on Windows](https://desktop.docker.com/win/main/amd64/Docker%2520Desktop%2520Installer.exe)
 
 *   Enable WSL2 Backend during the installation
 
@@ -68,15 +68,15 @@ Setup Container
 
 *   Check that you are at `/home/ubuntu`
     `cd`
-*   Download and extract the Lyquix Docker Package  
-    `curl -L https://github.com/Lyquix/docker-lamp/archive/refs/heads/main.zip  `
-    `sudo apt install unzip`  
-    `unzip docker-lamp-main.zip`  
-    `mv docker-lamp-main/* Docker`  
-    `rm -r docker-lamp-main*`
-*   Execute the container setup script  
-    `cd Docker`  
-    `chmod +x container-setup.sh`  
+*   Download and extract the Lyquix Docker Package
+    `curl -O -L https://github.com/Lyquix/docker-lamp/archive/refs/heads/main.zip`
+    `sudo apt install unzip`
+    `unzip main.zip`
+    `mv docker-lamp-main/* Docker`
+    `rm -r docker-lamp-main main.zip
+*   Execute the container setup script
+    `cd Docker`
+    `chmod +x container-setup.sh`
     `./container-setup.sh`
 
 10.  You can close the Ubuntu app now, you should not need to use it anymore.
@@ -90,9 +90,9 @@ Setup the LAMP Server
 
 *   Start the container
 *   Open the container terminal
-*   Change to the bash shell  
+*   Change to the bash shell
     `bash`
-*   Execute the LAMP setup script  
+*   Execute the LAMP setup script
     .`/lamp-setup.sh`
 *   The script is mostly automated. When prompted to select a timezone, use US (option 12) and Eastern time (option 5)
 *   The whole process should be completed in less than 10 minutes
@@ -104,12 +104,12 @@ Important notes about this LAMP setup:
 *   When starting the Docker container, the Apache and MySQL services will not be running. Just go to the terminal and run `/start.sh` to get them started.
 *   The access logs for all the local sites are discarded. If you need to see the access log for a specific site, change the `CustomLog` setting in its VirtualHost file
 *   The error log for all sites can be found at `/var/log/apache2/error.log`
-*   MySQL has been configured so that you only need to use one user for all sites  
+*   MySQL has been configured so that you only need to use one user for all sites
     User: `dbuser`
     Password: `dbpassword`
-*   phpMyAdmin has been installed and configured to login automatically  
+*   phpMyAdmin has been installed and configured to login automatically
     [http://localhost/pma](http://localhost/pma)
-*   Search-Replace DB has been installed and configured to login automatically  
+*   Search-Replace DB has been installed and configured to login automatically
     [http://localhost/srdb](http://localhost/srdb)
 
 Setup a New Site
@@ -118,17 +118,17 @@ Setup a New Site
 15.  Make sure you are setting the site on the correct container, the one that matches the Ubuntu version of the development and production environments
 16.  Go to Docker Desktop and open the container terminal
 
-*   Change to the bash shell  
+*   Change to the bash shell
     `bash`
-*   Run the new site setup script  
+*   Run the new site setup script
     `/srv/www/site-setup.sh`
 *   Enter the local domain, typically a `.test` domain. This will be used to generate the VirtualHost file.
 *   Enter the production domain, this will be used to create the directory under `www`.
 *   Enter the database name
 
-17.  Set the local repo and download the site files to  
+17.  Set the local repo and download the site files to
     `C:\Users\[username]\Documents\Docker\ubuntu\[18|20]\www\[site-directory]\public_html`
-18.  Download a database dump and import it to the local database  
+18.  Download a database dump and import it to the local database
     `mysql -u dbuser -p databasename < dump.sql`
 19.  Adjust Joomla's configuration.php
 
@@ -145,18 +145,18 @@ Setup a New Site
 
 21.  Adjust .htaccess
 
-*   Comment out  
+*   Comment out
     `ModPagespeed`
-*   Comment out domain and SSL redirect, for example:  
-    `RewriteCond %{HTTP_HOST} !^example.com$ [OR,NC]`  
-    `RewriteCond %{SERVER_PORT} 80`  
+*   Comment out domain and SSL redirect, for example:
+    `RewriteCond %{HTTP_HOST} !^example.com$ [OR,NC]`
+    `RewriteCond %{SERVER_PORT} 80`
     `RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]`
 
 22.  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
 
 *   Right-click on the Notepad icon (or your preferred text editor) and click on Run as Administrator
 *   Open the file `C:\Windows\System32\drivers\etc\hosts`
-*   Add the following line at the bottom of the file  
+*   Add the following line at the bottom of the file
     `127.0.0.1  domain.test`
 
 Fix File Permissions
@@ -166,9 +166,9 @@ File permissions for the `www` directory need to be properly set up to ensure th
 
 23.  Go to Docker Desktop and open the container terminal
 
-*   Change to the bash shell  
+*   Change to the bash shell
     `bash`
-*   Run the new file permissions script  
+*   Run the new file permissions script
     `/srv/www/file-permissions.sh`
 *   Choose whether to update one directory or all directories
 *   If selected one directory, select directory from the list
