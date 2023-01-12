@@ -11,52 +11,62 @@ Windows Subsystem for Linux
 *   Enable Virtual Machine Platform
 *   Enable Windows Subsystem for Linux
 
-2.  Restart Windows
-3.  Open CMD as Administrator
+1.  Restart Windows
+1.  Open Windows Command Prompt as Administrator
 
 *   Set future WSL installations to Version 2
-    `wsl --set-default-version 2`
+```
+wsl --set-default-version 2
+```
 
-4.  Install [Ubuntu](https://www.microsoft.com/store/productId/9PDXGNCFSCZV) from the Microsoft Store
-5.  Open the Ubuntu application and wait a moment for it to initialize for the first time
+1.  Install [Ubuntu](https://www.microsoft.com/store/productId/9PDXGNCFSCZV) from the Microsoft Store
+1.  Open the Ubuntu application and wait a moment for it to initialize for the first time
 
 *   Once a prompt appears, input the following:
     *   UNIX username: `ubuntu`
     *   Password: `ubuntu`
     *   Retype password: `ubuntu`
 *   Create the Docker folder
-    `mkdir /home/ubuntu/Docker`
+```
+mkdir /home/ubuntu/Docker
+```
 
-6.  Open CMD as Administrator
+1.  Open Windows Command Prompt as Administrator
 
 *   Make sure Ubuntu is running on WSL version 2
-    `wsl --set-version Ubuntu 2`
+```
+wsl --set-version Ubuntu 2
+```
 *   Make sure Ubuntu is set as the default distribution
-    `wsl --set-default Ubuntu`
+```
+wsl --set-default Ubuntu
+```
 *   To check that Ubuntu is the default distro and that it's running on WSL 2 use
-    `wsl -l -v`
+```
+wsl -l -v
+```
 *   Create a symbolic link from the Documents folder to the Docker folder in Ubuntu
-    `cd %userprofile%\Documents`
-    `mklink /d Docker \\wsl.localhost\Ubuntu\home\ubuntu\Docker`
+```
+cd %userprofile%\Documents
+mklink /d Docker \\wsl.localhost\Ubuntu\home\ubuntu\Docker
+```
 
-7.  You can close CMD now
-8.  Restart Windows
+1.  You can close Windows Command Prompt now
+1.  Restart Windows
 
 Notes:
 
-*   You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window:
-    `\\wsl.localhost\Ubuntu`
-*   If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command:
-    `wsl –unregister Ubuntu`
+*   You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window: `\\wsl.localhost\Ubuntu`
+*   If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command: `wsl –unregister Ubuntu`
 
 Docker Desktop for Windows
 --------------------------
 
-7.  Install [Docker Desktop on Windows](https://desktop.docker.com/win/main/amd64/Docker%2520Desktop%2520Installer.exe)
+1.  Install [Docker Desktop on Windows](https://desktop.docker.com/win/main/amd64/Docker%2520Desktop%2520Installer.exe)
 
 *   Enable WSL2 Backend during the installation
 
-8.  Once installed and running, go to Settings, make sure these are enabled:
+1.  Once installed and running, go to Settings, make sure these are enabled:
 
 *   General -> Use the WSL 2 based engine
 *   Resources -> WSL Integration -> Enable integration with my default WSL distro
@@ -64,40 +74,50 @@ Docker Desktop for Windows
 Setup Container
 ---------------
 
-9.  Open the Ubuntu application
+1.  Open the Ubuntu application
 
 *   Check that you are at `/home/ubuntu`
-    `cd`
+```
+cd
+```
 *   Download and extract the Lyquix Docker Package
-    `curl -O -L https://github.com/Lyquix/docker-lamp/archive/refs/heads/main.zip`
-    `sudo apt install unzip`
-    `unzip main.zip`
-    `mv docker-lamp-main/* Docker`
-    `rm -r docker-lamp-main main.zip
+```
+curl -O -L https://github.com/Lyquix/docker-lamp/archive/refs/heads/main.zip
+sudo apt install unzip
+unzip main.zip
+mv docker-lamp-main/* Docker
+rm -r docker-lamp-main main.zip
+```
 *   Execute the container setup script
-    `cd Docker`
-    `chmod +x container-setup.sh`
-    `./container-setup.sh`
+```
+cd Docker
+chmod +x container-setup.sh
+./container-setup.sh
+```
 
-10.  You can close the Ubuntu app now, you should not need to use it anymore.
+1.  You can close the Ubuntu app now, you should not need to use it anymore.
 
 Setup the LAMP Server
 ---------------------
 
-11.  Go to Docker Desktop
-12.  Under Containers, you should see the two new containers: ubuntu18 and ubuntu20 in "Exited" status. NOTE: since both containers use the same ports, you can only use one of the containers at a time.
-13.  Setup ubuntu18:
+1.  Go to Docker Desktop
+1.  Under Containers, you should see the two new containers: ubuntu18 and ubuntu20 in "Exited" status. NOTE: since both containers use the same ports, you can only use one of the containers at a time.
+1.  Setup ubuntu18:
 
 *   Start the container
 *   Open the container terminal
 *   Change to the bash shell
-    `bash`
+```
+bash
+```
 *   Execute the LAMP setup script
-    .`/lamp-setup.sh`
+```
+./lamp-setup.sh
+```
 *   The script is mostly automated. When prompted to select a timezone, use US (option 12) and Eastern time (option 5)
 *   The whole process should be completed in less than 10 minutes
 
-15.  Repeat the steps above for ubuntu20
+1.  Repeat the steps above for ubuntu20
 
 Important notes about this LAMP setup:
 
@@ -115,61 +135,77 @@ Important notes about this LAMP setup:
 Setup a New Site
 ----------------
 
-15.  Make sure you are setting the site on the correct container, the one that matches the Ubuntu version of the development and production environments
-16.  Go to Docker Desktop and open the container terminal
+1.  Make sure you are setting the site on the correct container, the one that matches the Ubuntu version of the development and production environments
+1.  Go to Docker Desktop and open the container terminal
 
 *   Change to the bash shell
-    `bash`
+```
+bash
+```
 *   Run the new site setup script
-    `/srv/www/site-setup.sh`
+```
+/srv/www/site-setup.sh
+```
 *   Enter the local domain, typically a `.test` domain. This will be used to generate the VirtualHost file.
 *   Enter the production domain, this will be used to create the directory under `www`.
 *   Enter the database name
 
-17.  Set the local repo and download the site files to
-    `C:\Users\[username]\Documents\Docker\ubuntu\[18|20]\www\[site-directory]\public_html`
-18.  Download a database dump and import it to the local database
-    `mysql -u dbuser -p databasename < dump.sql`
-19.  Adjust Joomla's configuration.php
-
-*   `$user = 'dbuser'`
-*   `$password = 'dbpassword'`
-*   `$session_handler = 'database'`
-*   `$force_ssl = '0'`
-*   `$cookie_domain = '[local.test domain]'`
-
-20.  Adjust WordPress wp-config.php
-
-*   `define( 'DB_USER', 'dbuser' );`
-*   `define( 'DB_PASSWORD', 'dbpassword' );`
-
-21.  Adjust .htaccess
-
+1.  Set the local repo and download the site files to
+```
+C:\Users\[username]\Documents\Docker\ubuntu\[18|20]\www\[site-directory]\public_html
+```
+1.  Download a database dump and import it to the local database
+```
+mysql -u dbuser -p databasename < dump.sql
+```
+1.  Adjust Joomla's configuration.php
+```
+$user = 'dbuser'
+$password = 'dbpassword'
+$session_handler = 'database'
+$force_ssl = '0'
+$cookie_domain = '[local.test domain]'
+```
+1.  Adjust WordPress wp-config.php
+```
+define( 'DB_USER', 'dbuser' );
+define( 'DB_PASSWORD', 'dbpassword' );
+```
+1.  Adjust .htaccess
 *   Comment out
-    `ModPagespeed`
+```
+ModPagespeed
+```
 *   Comment out domain and SSL redirect, for example:
-    `RewriteCond %{HTTP_HOST} !^example.com$ [OR,NC]`
-    `RewriteCond %{SERVER_PORT} 80`
-    `RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]`
-
-22.  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
+```
+RewriteCond %{HTTP_HOST} !^example.com$ [OR,NC]
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]
+```
+1.  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
 
 *   Right-click on the Notepad icon (or your preferred text editor) and click on Run as Administrator
 *   Open the file `C:\Windows\System32\drivers\etc\hosts`
 *   Add the following line at the bottom of the file
-    `127.0.0.1  domain.test`
+```
+127.0.0.1  domain.test
+```
 
 Fix File Permissions
 --------------------
 
 File permissions for the `www` directory need to be properly set up to ensure that you are able to work on the folder and that the sites work correctly on the virtual machine. Run this script whenever you encounter issues with creating, modifying or deleting files in `www`.
 
-23.  Go to Docker Desktop and open the container terminal
+1.  Go to Docker Desktop and open the container terminal
 
 *   Change to the bash shell
-    `bash`
+```
+bash
+```
 *   Run the new file permissions script
-    `/srv/www/file-permissions.sh`
+```
+/srv/www/file-permissions.sh
+```
 *   Choose whether to update one directory or all directories
 *   If selected one directory, select directory from the list
 
