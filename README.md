@@ -7,7 +7,6 @@ Windows Subsystem for Linux
 
 1.  Open Turn Windows features on and off:
 
-*   Enable HYPER-V
 *   Enable Virtual Machine Platform
 *   Enable Windows Subsystem for Linux
 
@@ -62,7 +61,7 @@ Notes:
 Docker Desktop for Windows
 --------------------------
 
-1.  Install [Docker Desktop on Windows](https://desktop.docker.com/win/main/amd64/Docker%2520Desktop%2520Installer.exe)
+1.  Install [Docker Desktop for Windows v.4.14.1](https://desktop.docker.com/win/main/amd64/91661/Docker%20Desktop%20Installer.exe)
 
 *   Enable WSL2 Backend during the installation
 
@@ -162,8 +161,8 @@ mysql -u dbuser -p databasename < dump.sql
 ```
 $user = 'dbuser'
 $password = 'dbpassword'
-$session_handler = 'database'
 $force_ssl = '0'
+$caching = '0'
 $cookie_domain = '[local.test domain]'
 ```
 1.  Adjust WordPress wp-config.php
@@ -214,7 +213,6 @@ Quirks
 
 *   When accessing the files in the WSL Ubuntu distro, the default behavior is for Linux to see you as the default user (`ubuntu`). However, I noticed that right after installing Ubuntu, the user was root. This made me think it would always be root and after I restarted my computer I had several issues with permissions.
 *   The files in the `www` directory must be owned by `www-data` for sites to work correctly. Since we're editing the files with the ubuntu user, files permissions have to be different than the way they are set up in the development and production environments. For this local machine, we need to give write and execute permissions to all users.
-*   I noticed a very bad issue with PHP when testing Joomla sites. I changed the setting for session management from Database to PHP on the production site. Using that setting on this local machine made it impossible to navigate the administrator - the browser would hang after one pageload, but it would load correctly after restarting Apache.
 
 To Do
 -----
