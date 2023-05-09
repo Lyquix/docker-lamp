@@ -61,7 +61,7 @@ Notes:
 Docker Desktop for Windows
 --------------------------
 
-*  Install [Docker Desktop for Windows v.4.14.1](https://desktop.docker.com/win/main/amd64/91661/Docker%20Desktop%20Installer.exe)
+*  Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)
 
     *  Enable WSL2 Backend during the installation
 
