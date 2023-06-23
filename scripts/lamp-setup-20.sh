@@ -307,6 +307,9 @@ cp config.sample.inc.php config.inc.php
 FIND="\['auth_type'\] = 'cookie';"
 REPLACE="['auth_type'] = 'config';\n\\\$cfg['Servers'][\\\$i]['user'] = 'dbuser';\n\\\$cfg['Servers'][\\\$i]['password'] = 'dbpassword';\n"
 perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
+FIND="\['host'\] = 'localhost'"
+REPLACE="['host'] = '127.0.0.1'"
+perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
 printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n";
 
 # Search-Replace DB
