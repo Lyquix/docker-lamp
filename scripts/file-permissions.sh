@@ -31,7 +31,7 @@ if [[ "$fixall" == "Y" ]]; then
 	chown -R www-data:www-data *
 	chmod -R g+w,o+w *
 	find */public_html -type d -exec chmod g+ws,o+ws {} \;
-	find */public_html/*.sh -type f -exec chmod +x {} \;
+	find */public_html -name "*.sh" -type f -exec chmod +x {} \;
 else
 	printf "Please select folder:\n"
 	select dir in */; do test -n "$dir" && break; echo ">>> Invalid Selection"; done
@@ -39,7 +39,7 @@ else
 	chown -R www-data:www-data $dir
 	chmod -R g+w,o+w $dir
 	find $dir/public_html -type d -exec chmod g+ws,o+ws {} \;
-	find $dir/public_html/*.sh -type f -exec chmod +x {} \;
+	find $dir/public_html -name "*.sh" -type f -exec chmod +x {} \;
 fi
 
 cd $CURRDIR
