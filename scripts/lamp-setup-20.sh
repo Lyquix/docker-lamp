@@ -9,6 +9,7 @@ fi
 DIVIDER="\n***************************************\n\n"
 DEBIAN_FRONTEND=noninteractive
 DEBCONF_NONINTERACTIVE_SEEN=true
+NEEDRESTART_MODE=a
 
 # Welcome and instructions
 printf $DIVIDER
@@ -25,6 +26,12 @@ printf "Repository update...\n"
 apt-get -y update
 printf "Upgrade installed packages...\n"
 apt-get -y upgrade
+
+printf "Setup time zone...\n"
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+echo "America/New_York" > /etc/timezone
+dpkg-reconfigure -f noninteractive tzdata
+
 printf "Install utilities...\n"
 PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common")
 for PCKG in "${PCKGS[@]}"
@@ -164,6 +171,13 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
 FIND="DirectoryIndex"
 REPLACE="DirectoryIndex index\.php"
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
+
+printf "Enable existing virtual hosts\n"
+cd /etc/apache2/sites-available
+for site_config in *.conf; do
+	a2ensite "$site_config"
+done
+cd ~
 
 # PHP
 printf $DIVIDER
@@ -319,7 +333,7 @@ unzip srdb.zip
 mv Search-Replace-DB-3.1 srdb
 rm srdb.zip
 cd srdb
-sed -i '196s/()/("", "dbuser", "dbpassword", "localhost", "3306", "", "")/' index.php
+sed -i '196s/()/("", "dbuser", "dbpassword", "127.0.0.1", "3306", "", "")/' index.php
 printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n";
 
 # Initial file permissions

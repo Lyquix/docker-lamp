@@ -14,18 +14,26 @@ printf $DIVIDER
 chmod +x scripts/*.sh
 
 # Build containers
-for COUNTER in 18 20
+for COUNTER in 18 20 22
 do
 	printf "Ubuntu $COUNTER.04 container...\n"
+	printf " - Linking directories\n"
 	mkdir ubuntu$COUNTER/mysql
 	mkdir ubuntu$COUNTER/sites-available
 	mkdir ubuntu$COUNTER/www
+	printf " - Copying scripts\n"
 	cp scripts/site-setup.sh ubuntu$COUNTER/www
 	cp scripts/file-permissions.sh ubuntu$COUNTER/www
-	docker build . -t ubuntu$COUNTER -f ubuntu$COUNTER/Dockerfile
-	docker run -p 80:80 -v ${PWD}/ubuntu$COUNTER/sites-available:/etc/apache2/sites-available -v ${PWD}/ubuntu$COUNTER/www:/srv/www/ -v ${PWD}/ubuntu$COUNTER/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
+	printf " - Stoping and removing existing container\n"
 	docker stop ubuntu$COUNTER
-	printf "Done\n"
+	docker rm ubuntu$COUNTER
+	printf " - Building new container\n"
+	docker build . -t ubuntu$COUNTER -f ubuntu$COUNTER/Dockerfile
+	printf " - Running container\n"
+	docker run -p 80:80 -v $SCRIPTDIR/ubuntu$COUNTER/sites-available:/etc/apache2/sites-available -v $SCRIPTDIR/ubuntu$COUNTER/www:/srv/www/ -v $SCRIPTDIR/ubuntu$COUNTER/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
+	printf " - Stopping container\n"
+	docker stop ubuntu$COUNTER
+	printf "Done!\n"
 done
 
 cd ${CURRDIR}

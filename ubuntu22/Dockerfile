@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Create directories
 RUN mkdir -p /etc/apache2/sites-available
@@ -6,7 +6,7 @@ RUN mkdir -p /srv/www
 RUN mkdir -p /var/lib/mysql
 
 # Copy scripts and set permission to execute
-COPY scripts/lamp-setup-20.sh /lamp-setup.sh
+COPY scripts/lamp-setup-22.sh /lamp-setup.sh
 COPY scripts/start.sh /start.sh
 RUN chmod +x /lamp-setup.sh
 RUN chmod +x /start.sh

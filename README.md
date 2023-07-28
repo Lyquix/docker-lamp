@@ -79,18 +79,18 @@ Setup Container
         ```
         cd
         ```
-    *  Download and install NodeJS
+    *  Download and install NVM ([Node Version Manager](https://github.com/nvm-sh/nvm)) to switch between NodeJS versions as needed
         ```
-        curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-        sudo apt install -y nodejs
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm install --lts
         ```
-    *  Download and extract the Lyquix Docker Package
+    *  Clone the Lyquix Docker LAMP repository
         ```
-        curl -O -L https://github.com/Lyquix/docker-lamp/archive/refs/heads/main.zip
-        sudo apt install unzip
-        unzip main.zip
-        mv docker-lamp-main/* Docker
-        rm -r docker-lamp-main main.zip
+        sudo apt install git
+        git clone https://github.com/Lyquix/docker-lamp.git Docker
         ```
     *  Execute the container setup script
         ```
@@ -99,31 +99,8 @@ Setup Container
         ./container-setup.sh
         ```
 
-Setup the LAMP Server
----------------------
-
-*  Go to Docker Desktop
-*  Under Containers, you should see the two new containers: ubuntu18 and ubuntu20 in "Exited" status. NOTE: since both containers use the same ports, you can only use one of the containers at a time.
-*  Setup ubuntu18:
-
-    *  Start the container
-    *  Open the container terminal
-    *  Change to the bash shell
-        ```
-        bash
-        ```
-    *  Execute the LAMP setup script
-        ```
-        ./lamp-setup.sh
-        ```
-    *  The script is mostly automated. When prompted to select a timezone, use US (option 12) and Eastern time (option 5)
-    *  The whole process should be completed in less than 10 minutes
-
-*  Repeat the steps above for ubuntu20
-
 Important notes about this LAMP setup:
 
-*  When starting the Docker container, the Apache and MySQL services will not be running. Just go to the terminal and run `/start.sh` to get them started.
 *  The access logs for all the local sites are discarded. If you need to see the access log for a specific site, change the `CustomLog` setting in its VirtualHost file
 *  The error log for all sites can be found at `/var/log/apache2/error.log`
 *  MySQL has been configured so that you only need to use one user for all sites
@@ -174,6 +151,7 @@ Setup a New Site
     ```
     $user = 'dbuser'
     $password = 'dbpassword'
+    $host = '127.0.0.1'
     $force_ssl = '0'
     $caching = '0'
     $cookie_domain = '[local.test domain]'
@@ -182,6 +160,7 @@ Setup a New Site
     ```
     define( 'DB_USER', 'dbuser' );
     define( 'DB_PASSWORD', 'dbpassword' );
+    define( 'DB_HOST', '127.0.0.1' );
     ```
 *  Adjust .htaccess
 *  Comment out
@@ -231,5 +210,4 @@ To Do
 -----
 
 *  Configure the Windows Firewall to prevent external access to port 80 and phpMyAdmin
-*  Setup SSH server and expose port 22 so that we can use Putty to connect to the Docker VM instead of using the Docker Desktop terminal (will also need to look into the Windows Firewall to protect this
-*  Automatically start Apache and MySQL when the container is started (or have a way to monitor when those services aren't running and restart them automatically).
+*  Setup SSH server and expose port 22 so that we can use Putty to connect to the Docker VM instead of using the Docker Desktop terminal (will also need to look into the Windows Firewall to protect this)

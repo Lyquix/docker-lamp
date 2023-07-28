@@ -13,7 +13,7 @@ NEEDRESTART_MODE=a
 
 # Welcome and instructions
 printf $DIVIDER
-printf "Lyquix LAMP server setup on Ubuntu 18.04\n"
+printf "Lyquix LAMP server setup on Ubuntu 20.04\n"
 printf $DIVIDER
 
 # Install and update software
@@ -45,7 +45,7 @@ do
 	apt-get -y install ${PCKG}
 done
 printf "Install PHP...\n"
-PCKGS=("mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "php-auth" "php-mcrypt" "composer")
+PCKGS=("mcrypt" "imagemagick" "php8.1" "php8.1-common" "php8.1-gd" "php8.1-imap" "php8.1-mysql" "php8.1-mysqli" "php8.1-cli" "php8.1-cgi" "php8.1-zip" "php-pear" "php-imagick" "php8.1-curl" "php8.1-mbstring" "php8.1-bcmath" "php8.1-xml" "php8.1-soap" "php8.1-opcache" "php8.1-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php8.1-dev" "libapache2-mod-php8.1" "php-auth" "php-mcrypt" "composer")
 for PCKG in "${PCKGS[@]}"
 do
 	apt-get -y install ${PCKG}
@@ -185,70 +185,70 @@ printf "PHP\n"
 printf "The script will update PHP configuration\n"
 
 
-if [ ! -f /etc/php/7.2/apache2/php.ini.orig ]; then
-	printf "Backing up PHP.ini configuration file to /etc/php/7.2/apache2/php.ini.orig\n"
-	cp /etc/php/7.2/apache2/php.ini /etc/php/7.2/apache2/php.ini.orig
+if [ ! -f /etc/php/7.4/apache2/php.ini.orig ]; then
+	printf "Backing up PHP.ini configuration file to /etc/php/7.4/apache2/php.ini.orig\n"
+	cp /etc/php/7.4/apache2/php.ini /etc/php/7.4/apache2/php.ini.orig
 fi
 
 FIND="^\s*output_buffering\s*=\s*.*"
 REPLACE="output_buffering = Off"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*max_execution_time\s*=\s*.*"
 REPLACE="max_execution_time = 60"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*error_reporting\s*=\s*.*"
 REPLACE="error_reporting = E_ALL \& ~E_NOTICE \& ~E_STRICT \& ~E_DEPRECATED"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*log_errors_max_len\s*=\s*.*"
 REPLACE="log_errors_max_len = 0"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*post_max_size\s*=\s*.*"
 REPLACE="post_max_size = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*upload_max_filesize\s*=\s*.*"
 REPLACE="upload_max_filesize = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*short_open_tag\s*=\s*.*"
 REPLACE="short_open_tag = On"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*;\s*max_input_vars\s*=\s*.*" # this is commented in the original file
 REPLACE="max_input_vars = 5000"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
 FIND="^\s*;\s*memory_limit\s*=\s*.*" # this is commented in the original file
 REPLACE="memory_limit = 1024M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/apache2/php.ini
 
-# php7.2.conf correct settings
-if [ ! -f /etc/apache2/mods-available/php7.2.conf.orig ]; then
-	printf "Backing up php7.2.conf configuration file to /etc/apache2/mods-available/php7.2.conf.orig\n"
-	cp /etc/apache2/mods-available/php7.2.conf /etc/apache2/mods-available/php7.2.conf.orig
+# php8.1.conf correct settings
+if [ ! -f /etc/apache2/mods-available/php8.1.conf.orig ]; then
+	printf "Backing up php8.1.conf configuration file to /etc/apache2/mods-available/php8.1.conf.orig\n"
+	cp /etc/apache2/mods-available/php8.1.conf /etc/apache2/mods-available/php8.1.conf.orig
 fi
 
-printf "Correct settings in php7.2.conf\n"
+printf "Correct settings in php8.1.conf\n"
 FIND="Order Deny,Allow"
 REPLACE="# Order Deny,Allow"
-perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php7.2.conf
+perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php8.1.conf
 
 FIND="Deny from all"
 REPLACE="# Deny from all\n\tRequire all granted"
-perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php7.2.conf
+perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php8.1.conf
 
 # Restart Apache
 printf "Restarting Apache...\n"

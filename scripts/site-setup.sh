@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Check if script is being run by root
-if [[ $EUID -ne 0 ]]; then
-   printf "This script must be run as root!\n"
-   exit 1
-fi
-
 DIVIDER="\n***************************************\n\n"
 
 # Welcome and instructions
@@ -34,19 +28,18 @@ while true; do
 done
 
 VIRTUALHOST="<VirtualHost *:80>\n\tServerName $localdomain\n\tDocumentRoot /srv/www/$proddomain/public_html/\n\tCustomLog /dev/null combined\n</VirtualHost>\n";
-printf "$VIRTUALHOST" > /etc/apache2/sites-available/$localdomain.conf
+sudo printf "$VIRTUALHOST" > /etc/apache2/sites-available/$localdomain.conf
 
 # Create directories
 mkdir -p /srv/www/$proddomain/public_html
-chown -R www-data:www-data /srv/www/$proddomain
 
 # Update permissions
 chown -R www-data:www-data /srv/www/$proddomain
 chmod -R g+w,o+w /srv/www/$proddomain
 
 # Enable sites
-a2ensite $localdomain
-service apache2 reload
+sudo a2ensite $localdomain
+sudo service apache2 reload
 
 printf "You can now copy the site files to:\n\t/srv/www/$proddomain\nand you can reach the site at:\n\thttp://$localdomain/\n";
 
