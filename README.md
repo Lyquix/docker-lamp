@@ -204,8 +204,7 @@ Quirks
 ------
 
 *  When accessing the files in the WSL Ubuntu distro, the default behavior is for Linux to see you as the default user (`ubuntu`). However, I noticed that right after installing Ubuntu, the user was root. This made me think it would always be root and after I restarted my computer I had several issues with permissions.
-*  The files in the `www` directory must be owned by `www-data` for sites to work correctly. Since we're editing the files with the ubuntu user, files permissions have to be different than the way they are set up in the development and production environments. For this local machine, we need to give write and execute permissions to all users.
-
+*  Some times MySQL will not start when the container boots. You can manually run `sudo /start.sh` from the Docker terminal to start the services again
 To Do
 -----
 

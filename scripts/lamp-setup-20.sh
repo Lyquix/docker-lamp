@@ -172,13 +172,6 @@ FIND="DirectoryIndex"
 REPLACE="DirectoryIndex index\.php"
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
 
-printf "Enable existing virtual hosts\n"
-cd /etc/apache2/sites-available
-for site_config in *.conf; do
-	a2ensite "$site_config"
-done
-cd ~
-
 # PHP
 printf $DIVIDER
 printf "PHP\n"
