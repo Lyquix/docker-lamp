@@ -130,7 +130,7 @@ To install WSLGit:
 
 *  Download the latest release of `wslgit.zip` from https://github.com/andy-5/wslgit/releases
 *  Extract the contents (a `wslgit` folder) to `C:\Program Files`
-*  Run C:\Program Files\install.bat **as Administrator**
+*  Run `C:\Program Files\wslgit\install.bat` **as Administrator**
 *  Open a Command Prompt window **as Administrator** and execute:
    ```
    setx /M path "%path%;C:\Program Files\wslgit\cmd\;C:\Program Files\wslgit\bin\"
