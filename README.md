@@ -121,6 +121,22 @@ NodeJS and the scripts used to compile JS and CSS will be running on the Ubuntu 
     *  Type `terminal default profile` and click on the one result
     *  Select "Ubuntu (WSL)" as the default terminal
 
+Add WSLGit
+----------
+
+Running a Git UI like SourceTree or VSCode from Windows to files stored in WSL can be very slow. The [WSLGit project](https://github.com/andy-5/wslgit) provides a small executable that forwards all arguments to git running inside Bash on Windows/Windows Subsystem for Linux (WSL).
+
+To install WSLGit:
+
+*  Download the latest release of `wslgit.zip` from https://github.com/andy-5/wslgit/releases
+*  Extract the contents (a `wslgit` folder) to `C:\Program Files`
+*  Run C:\Program Files\install.bat **as Administrator**
+*  Open a Command Prompt window **as Administrator** and execute:
+   ```
+   setx /M path "%path%;C:\Program Files\wslgit\cmd\;C:\Program Files\wslgit\bin\"
+   ```
+*  Restart Windows
+
 Setup a New Site
 ----------------
 
@@ -175,8 +191,7 @@ Setup a New Site
     ```
 *  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
 
-    *  Right-click on the Notepad icon (or your preferred text editor) and click on Run as Administrator
-    *  Open the file `C:\Windows\System32\drivers\etc\hosts`
+    *  Install [Microsoft PowerToys](https://apps.microsoft.com/store/detail/microsoft-powertoys/XP89DCGQ3K6VLD) and use the [Hosts File Editor](https://learn.microsoft.com/en-us/windows/powertoys/hosts-file-editor)
     *  Add the following line at the bottom of the file
         ```
         127.0.0.1  domain.test
