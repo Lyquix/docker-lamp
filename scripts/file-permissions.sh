@@ -3,6 +3,7 @@
 # Check if script is being run by root
 if [[ $EUID -ne 0 ]]; then
    printf "This script must be run as root!\n"
+	 exec sudo "$0" "$@"
    exit 1
 fi
 
