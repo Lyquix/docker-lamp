@@ -7,6 +7,31 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Function to check if a directory is mounted
+function check_directory_mounted {
+   while true; do
+      # Check if the target directory is mounted
+      mounted=$(mount | grep "$1")
+      if [ "$mounted" ]; then
+         echo "$1 is mounted"
+         break
+      else
+         echo "$1 is not mounted yet, waiting 5 seconds..."
+         sleep 5
+      fi
+   done
+}
+check_directory_mounted "/srv/www"
+check_directory_mounted "/etc/apache2/sites-available"
+check_directory_mounted "/var/lib/mysql"
+
+# Check if the script /lamp-setup.sh exists
+if [[ -f "/lamp-setup.sh" ]]; then
+   chmod +x /lamp-setup.sh
+   /lamp-setup.sh
+   rm /lamp-setup.sh
+fi
+
 # Apache
 if service --status-all | grep -wq apache2; then
    echo "Apache2 is installed"
@@ -16,7 +41,7 @@ if service --status-all | grep -wq apache2; then
       a2ensite "$site_config"
    done
    cd ~
-   service apache2 start
+   service apache2 restart
 else
    echo "Apache2 is not installed"
 fi
@@ -25,7 +50,7 @@ fi
 if service --status-all | grep -wq mysql; then
    echo "MySQL is installed"
    echo "Enabling existing virtual hosts"
-   service mysql start
+   service mysql restart
 else
    echo "MySQL is not installed"
 fi

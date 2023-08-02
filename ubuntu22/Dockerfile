@@ -16,10 +16,7 @@ RUN apt update
 RUN apt install -y sudo
 RUN echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
-# Run LAMP setup script
-RUN /lamp-setup.sh
-
-# Configure the start script
+# Run the start script on every boot
 CMD /usr/bin/sudo /start.sh
 
 # Set www-data as the default user
