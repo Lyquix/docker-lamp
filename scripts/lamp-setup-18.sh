@@ -1,9 +1,26 @@
 #!/bin/bash
 
+# Check if --no-sudo was passed
+NO_SUDO=0
+for param in "$@"; do
+	if [ "$param" = "--no-sudo" ]; then
+		NO_SUDO=1
+	fi
+done
+
 # Check if script is being run by root
 if [[ $EUID -ne 0 ]]; then
-   printf "This script must be run as root!\n"
-   exit 1
+	printf "This script must be run as root!\n"
+	if [ ! NO_SUDO ]; then
+		exec sudo "$0" --no-sudo
+	fi
+	exit
+fi
+
+# Check if the script is being run in Docker
+if ! grep -q docker /proc/1/cgroup; then
+	printf "This script must be run in the Docker terminal\n"
+	exit
 fi
 
 DIVIDER="\n***************************************\n\n"
@@ -29,25 +46,22 @@ apt-get -y upgrade
 
 printf "Setup time zone...\n"
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
-echo "America/New_York" > /etc/timezone
+echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install utilities...\n"
 PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common")
-for PCKG in "${PCKGS[@]}"
-do
+for PCKG in "${PCKGS[@]}"; do
 	apt-get -y install ${PCKG}
 done
 printf "Install Apache...\n"
 PCKGS=("apache2" "libapache2-mod-php" "libapache2-mod-fcgid")
-for PCKG in "${PCKGS[@]}"
-do
+for PCKG in "${PCKGS[@]}"; do
 	apt-get -y install ${PCKG}
 done
 printf "Install PHP...\n"
 PCKGS=("mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "php-auth" "php-mcrypt" "composer")
-for PCKG in "${PCKGS[@]}"
-do
+for PCKG in "${PCKGS[@]}"; do
 	apt-get -y install ${PCKG}
 done
 printf "Install MySQL...\n"
@@ -56,7 +70,6 @@ apt-get -y install mysql-server mysql-client
 # APACHE configuration
 printf $DIVIDER
 printf "APACHE CONFIGURATION\n"
-
 
 printf "Enabling Apache modules...\n"
 a2enmod expires headers rewrite ssl suphp mpm_prefork security2
@@ -78,7 +91,8 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/apache2.conf
 
 printf "Adding security settings and caching...\n"
 FIND="#<\/Directory>"
-REPLACE="$(cat << 'EOF'
+REPLACE="$(
+	cat <<'EOF'
 #</Directory>
 
 # Disable HTTP 1.0
@@ -105,14 +119,15 @@ Header unset ETag
 FileETag None
 EOF
 )"
-REPLACE=${REPLACE//\//\\\/} # Escape the / characters
+REPLACE=${REPLACE//\//\\\/}   # Escape the / characters
 REPLACE=${REPLACE//$'\n'/\\n} # Escape the new line characters
-REPLACE=${REPLACE//\$/\\$} # Escape the $ characters
+REPLACE=${REPLACE//\$/\\$}    # Escape the $ characters
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/apache2.conf
 
 printf "Adding <Directory /srv/www/> configuration for /srv/www...\n"
 FIND="#<\/Directory>"
-REPLACE="$(cat << 'EOF'
+REPLACE="$(
+	cat <<'EOF'
 #</Directory>
 
 <Directory /srv/www/>
@@ -134,7 +149,7 @@ REPLACE="$(cat << 'EOF'
 </Directory>
 EOF
 )"
-REPLACE=${REPLACE//\//\\\/} # Escape the / characters
+REPLACE=${REPLACE//\//\\\/}   # Escape the / characters
 REPLACE=${REPLACE//$'\n'/\\n} # Escape the new line characters
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/apache2.conf
 
@@ -176,7 +191,6 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
 printf $DIVIDER
 printf "PHP\n"
 printf "The script will update PHP configuration\n"
-
 
 if [ ! -f /etc/php/7.2/apache2/php.ini.orig ]; then
 	printf "Backing up PHP.ini configuration file to /etc/php/7.2/apache2/php.ini.orig\n"
@@ -252,7 +266,6 @@ printf $DIVIDER
 printf "MYSQL\n"
 printf "The script will update MySQL and setup intial databases\n"
 
-
 if [ ! -f /etc/mysql/mysql.conf.d/mysqld.cnf.orig ]; then
 	printf "Backing up my.cnf configuration file to /etc/mysql/mysql.conf.d/mysqld.cnf.orig\n"
 	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.orig
@@ -301,7 +314,7 @@ service mysql restart
 
 # Create dbuser
 mysql -u root -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
-printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n";
+printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n"
 
 # phpMyAdmin
 cd /var/www/html/
@@ -317,7 +330,7 @@ perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
 FIND="\['host'\] = 'localhost'"
 REPLACE="['host'] = '127.0.0.1'"
 perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
-printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n";
+printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n"
 
 # Search-Replace DB
 cd /var/www/html
@@ -327,7 +340,7 @@ mv Search-Replace-DB-3.1 srdb
 rm srdb.zip
 cd srdb
 sed -i '196s/()/("", "dbuser", "dbpassword", "127.0.0.1", "3306", "", "")/' index.php
-printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n";
+printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n"
 
 # Initial file permissions
 chown -R www-data:www-data /srv/www

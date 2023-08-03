@@ -2,7 +2,7 @@
 
 DIVIDER="\n***************************************\n\n"
 CURRDIR="${PWD}"
-SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPTDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 cd ${SCRIPTDIR}
 
 # Welcome and instructions
@@ -14,8 +14,7 @@ printf $DIVIDER
 chmod +x scripts/*.sh
 
 # Build containers
-for COUNTER in 18 20 22
-do
+for COUNTER in 18 20 22; do
 	printf "Ubuntu $COUNTER.04 container...\n"
 	printf " - Linking directories\n"
 	mkdir ubuntu$COUNTER/mysql

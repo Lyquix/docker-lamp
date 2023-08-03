@@ -1,11 +1,22 @@
 #!/bin/bash
 
+# Check if --no-sudo was passed
+NO_SUDO=0
+for param in "$@"; do
+	if [ "$param" = "--no-sudo" ]; then
+		NO_SUDO=1
+	fi
+done
+
 # Check if script is being run by root
 if [[ $EUID -ne 0 ]]; then
-   printf "This script must be run as root!\n"
-	 exec sudo "$0" "$@"
-   exit 1
+	printf "This script must be run as root!\n"
+	if [ ! NO_SUDO ]; then
+		exec sudo "$0" --no-sudo
+	fi
+	exit
 fi
+
 
 DIVIDER="\n***************************************\n\n"
 CURRDIR="${PWD}"
@@ -19,13 +30,13 @@ printf $DIVIDER
 while true; do
 	read -p "Fix file permissions for ALL sites [Y/N]? " fixall
 	case $fixall in
-		[Y]* ) break;;
-		[N]* ) break;;
-		* ) printf "Please answer Y or N\n";;
+	[Y]*) break ;;
+	[N]*) break ;;
+	*) printf "Please answer Y or N\n" ;;
 	esac
 done
 
-cd /srv/www/
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 if [[ "$fixall" == "Y" ]]; then
 	printf "Updating file permissions for all sites, please wait...\n"
@@ -35,7 +46,10 @@ if [[ "$fixall" == "Y" ]]; then
 	find /srv/www/*/public_html -name "*.sh" -type f -exec chmod +x {} \;
 else
 	printf "Please select folder:\n"
-	select dir in */; do test -n "$dir" && break; echo ">>> Invalid Selection"; done
+	select dir in */; do
+		test -n "$dir" && break
+		echo ">>> Invalid Selection"
+	done
 	printf "Updating file permissions for /srv/www/$dir...\n"
 	chown -R www-data:www-data /srv/www/$dir
 	chmod -R g+w,o+w /srv/www/$dir
