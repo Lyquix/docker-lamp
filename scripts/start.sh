@@ -43,7 +43,7 @@ check_directory_mounted "/var/lib/mysql"
 
 # Check if the script /lamp-setup.sh exists
 if [[ -f "/lamp-setup.sh" ]]; then
-	sleep 5
+	sleep 15
 	chmod +x /lamp-setup.sh
 	/lamp-setup.sh
 	rm /lamp-setup.sh
