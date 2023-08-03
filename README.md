@@ -98,6 +98,7 @@ Setup Container
         chmod +x container-setup.sh
         ./container-setup.sh
         ```
+    *  Wait for the setup to complete. On the first boot of each container the lamp-setup.sh script will be executed. The script is completely automated and will take 5 to 10 minutes to complete. You can follow progress in the container log viewer.
 
 Important notes about this LAMP setup:
 
@@ -121,21 +122,19 @@ NodeJS and the scripts used to compile JS and CSS will be running on the Ubuntu 
     *  Type `terminal default profile` and click on the one result
     *  Select "Ubuntu (WSL)" as the default terminal
 
-Add WSLGit
-----------
+Update configuration of Git in Windows
+--------------------------------------
 
-Running a Git UI like SourceTree or VSCode from Windows to files stored in WSL can be very slow. The [WSLGit project](https://github.com/andy-5/wslgit) provides a small executable that forwards all arguments to git running inside Bash on Windows/Windows Subsystem for Linux (WSL).
+The default Git configuration provides very poor performance when accessing repos in WSL. To improve the performance of Git operations perform the following steps:
 
-To install WSLGit:
-
-*  Download the latest release of `wslgit.zip` from https://github.com/andy-5/wslgit/releases
-*  Extract the contents (a `wslgit` folder) to `C:\Program Files`
-*  Run `C:\Program Files\wslgit\install.bat` **as Administrator**
-*  Open a Command Prompt window **as Administrator** and execute:
+*  Open a Command Prompt window **as Administrator**
+*  Execute the following commands:
    ```
-   setx /M path "%path%;C:\Program Files\wslgit\cmd\;C:\Program Files\wslgit\bin\"
+   git config --global core.autocrlf false
+   git config --system core.longpaths true
+   git config --system core.checkStat minimal
+   git config --system core.trustctime false
    ```
-*  Restart Windows
 
 Setup a New Site
 ----------------
@@ -189,6 +188,7 @@ Setup a New Site
     RewriteCond %{SERVER_PORT} 80
     RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]
     ```
+*  Fix file permissions (see details below)
 *  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
 
     *  Install [Microsoft PowerToys](https://apps.microsoft.com/store/detail/microsoft-powertoys/XP89DCGQ3K6VLD) and use the [Hosts File Editor](https://learn.microsoft.com/en-us/windows/powertoys/hosts-file-editor)
