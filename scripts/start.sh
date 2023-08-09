@@ -12,7 +12,7 @@ done
 if [[ $EUID -ne 0 ]]; then
 	printf "This script must be run as root!\n"
 	if [ ! NO_SUDO ]; then
-		exec sudo "$0" --no-sudo
+		exec sudo /start.sh --no-sudo
 	fi
 	exit
 fi
@@ -44,6 +44,8 @@ check_directory_mounted "/var/lib/mysql"
 # Check if the script /lamp-setup.sh exists
 if [[ -f "/lamp-setup.sh" ]]; then
 	sleep 15
+	rm /etc/apache2/sites-available/000-default.conf
+	rm /etc/apache2/sites-available/default-ssl.conf
 	chmod +x /lamp-setup.sh
 	/lamp-setup.sh
 	rm /lamp-setup.sh

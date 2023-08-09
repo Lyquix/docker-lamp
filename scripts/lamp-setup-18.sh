@@ -1,19 +1,8 @@
 #!/bin/bash
 
-# Check if --no-sudo was passed
-NO_SUDO=0
-for param in "$@"; do
-	if [ "$param" = "--no-sudo" ]; then
-		NO_SUDO=1
-	fi
-done
-
 # Check if script is being run by root
 if [[ $EUID -ne 0 ]]; then
 	printf "This script must be run as root!\n"
-	if [ ! NO_SUDO ]; then
-		exec sudo "$0" --no-sudo
-	fi
 	exit
 fi
 
