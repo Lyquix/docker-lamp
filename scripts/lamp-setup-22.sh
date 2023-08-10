@@ -132,7 +132,7 @@ REPLACE="$(
     Header set X-UA-Compatible "IE=edge"
     Header set X-XSS-Protection "1; mode=block"
     # Disable unused HTTP request methods
-    <LimitExcept GET POST HEAD>
+    <LimitExcept GET POST HEAD OPTIONS>
       deny from all
     </LimitExcept>
 </Directory>
