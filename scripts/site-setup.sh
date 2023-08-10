@@ -11,8 +11,8 @@ done
 # Check if script is being run by root
 if [[ $EUID -ne 0 ]]; then
 	printf "This script must be run as root!\n"
-	if [ ! NO_SUDO ]; then
-		exec sudo "$0" --no-sudo
+	if [ $NO_SUDO -eq 0 ]; then
+		exec sudo /bin/bash "$0" "$@" --no-sudo
 	fi
 	exit
 fi
