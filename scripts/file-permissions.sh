@@ -2,8 +2,8 @@
 
 # Check if --no-sudo was passed
 NO_SUDO=0
-for param in "$@"; do
-	if [ "$param" = "--no-sudo" ]; then
+for PARAM in "$@"; do
+	if [ "$PARAM" = "--no-sudo" ]; then
 		NO_SUDO=1
 	fi
 done
@@ -33,8 +33,8 @@ printf $DIVIDER
 
 # Prompt to continue
 while true; do
-	read -p "Fix file permissions for ALL sites [Y/N]? " fixall
-	case $fixall in
+	read -p "Fix file permissions for ALL sites [Y/N]? " FIXALL
+	case $FIXALL in
 	[Y]*) break ;;
 	[N]*) break ;;
 	*) printf "Please answer Y or N\n" ;;
@@ -43,7 +43,7 @@ done
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-if [[ "$fixall" == "Y" ]]; then
+if [[ "$FIXALL" == "Y" ]]; then
 	printf "Updating file permissions for all sites, please wait...\n"
 	chown -R www-data:www-data /srv/www/*
 	chmod -R g+w,o+w /srv/www/*
@@ -51,15 +51,15 @@ if [[ "$fixall" == "Y" ]]; then
 	find /srv/www/*/public_html -name "*.sh" -type f -exec chmod +x {} \;
 else
 	printf "Please select folder:\n"
-	select dir in */; do
-		test -n "$dir" && break
+	select DIR in */; do
+		test -n "$DIR" && break
 		echo ">>> Invalid Selection"
 	done
-	printf "Updating file permissions for /srv/www/$dir...\n"
-	chown -R www-data:www-data /srv/www/$dir
-	chmod -R g+w,o+w /srv/www/$dir
-	find /srv/www/$dir/public_html -type d -exec chmod g+ws,o+ws {} \;
-	find /srv/www/$dir/public_html -name "*.sh" -type f -exec chmod +x {} \;
+	printf "Updating file permissions for /srv/www/$DIR...\n"
+	chown -R www-data:www-data /srv/www/$DIR
+	chmod -R g+w,o+w /srv/www/$DIR
+	find /srv/www/$DIR/public_html -type d -exec chmod g+ws,o+ws {} \;
+	find /srv/www/$DIR/public_html -name "*.sh" -type f -exec chmod +x {} \;
 fi
 
 cd $CURRDIR

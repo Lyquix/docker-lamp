@@ -2,12 +2,16 @@ FROM ubuntu:18.04
 
 # Create directories
 RUN mkdir -p /etc/apache2/sites-available
+RUN mkdir -p /etc/apache2/ssl
 RUN mkdir -p /srv/www
 RUN mkdir -p /var/lib/mysql
 
 # Copy scripts and set permission to execute
 COPY scripts/lamp-setup-18.sh /lamp-setup.sh
 COPY scripts/start.sh /start.sh
+COPY ssl/ssl.cnf /etc/apache2/ssl/ssl.cnf
+COPY ssl/root.pem /etc/apache2/ssl/root.pem
+COPY ssl/root.key /etc/apache2/ssl/root.key
 RUN chmod +x /lamp-setup.sh
 RUN chmod +x /start.sh
 

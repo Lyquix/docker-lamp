@@ -2,8 +2,8 @@
 
 # Check if --no-sudo was passed
 NO_SUDO=0
-for param in "$@"; do
-	if [ "$param" = "--no-sudo" ]; then
+for PARAM in "$@"; do
+	if [ "$PARAM" = "--no-sudo" ]; then
 		NO_SUDO=1
 	fi
 done
@@ -27,9 +27,9 @@ fi
 function check_directory_mounted {
 	while true; do
 		# Check if the target directory is mounted
-		mounted=$(mount | grep "$1")
-		if [ "$mounted" ]; then
-			echo "$1 is mounted"
+		MOUNTED=$(mount | grep "$1")
+		if [ "$MOUNTED" ]; then
+			echo "$1 is MOUNTED"
 			break
 		else
 			echo "$1 is not mounted yet, waiting 5 seconds..."
@@ -43,9 +43,11 @@ check_directory_mounted "/var/lib/mysql"
 
 # Check if the script /lamp-setup.sh exists
 if [[ -f "/lamp-setup.sh" ]]; then
+	echo "Please wait for the LAMP setup script to start..."
+	# Sleep for 15 seconds to prevent execution during container creation
 	sleep 15
-	rm /etc/apache2/sites-available/000-default.conf
-	rm /etc/apache2/sites-available/default-ssl.conf
+
+	# Run the LAMP setup script
 	chmod +x /lamp-setup.sh
 	/lamp-setup.sh
 	rm /lamp-setup.sh
@@ -54,21 +56,23 @@ fi
 # Apache
 if service --status-all | grep -wq apache2; then
 	echo "Apache2 is installed"
-	echo "Enabling existing virtual hosts"
-	cd /etc/apache2/sites-available
-	for site_config in *.conf; do
-		a2ensite "$site_config"
-	done
-	cd ~
 	service apache2 restart
+	service
 else
 	echo "Apache2 is not installed"
 fi
 
+# PHP-FPM
+for VERSION in 7.2 7.4 8.1; do
+	if service --status-all | grep -wq "php$VERSION-fpm"; then
+		echo "PHP-FPM $VERSION is installed"
+		service "php$VERSION-fpm" restart
+	fi
+done
+
 # MySQL
 if service --status-all | grep -wq mysql; then
 	echo "MySQL is installed"
-	echo "Enabling existing virtual hosts"
 	service mysql restart
 else
 	echo "MySQL is not installed"

@@ -1,0 +1,23 @@
+# gitignore common files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*Zone.Identifier
+
+# Root CA
+/ssl/root.key
+/ssl/root.pem
+
+# Container Data
+/ubuntu18/mysql
+/ubuntu18/sites-available
+/ubuntu18/ssl
+/ubuntu18/www
+/ubuntu20/mysql
+/ubuntu20/sites-available
+/ubuntu20/ssl
+/ubuntu20/www
+/ubuntu22/mysql
+/ubuntu22/sites-available
+/ubuntu22/ssl
+/ubuntu22/www

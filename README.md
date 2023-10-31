@@ -56,7 +56,7 @@ Windows Subsystem for Linux
 Notes:
 
 *  You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window: `\\wsl.localhost\Ubuntu`
-*  If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command: `wsl –unregister Ubuntu`
+*  If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command: `wsl -unregister Ubuntu`
 
 Docker Desktop for Windows
 --------------------------
@@ -99,6 +99,11 @@ Setup Container
         ./container-setup.sh
         ```
     *  Wait for the setup to complete. On the first boot of each container the lamp-setup.sh script will be executed. The script is completely automated and will take 5 to 10 minutes to complete. You can follow progress in the container log viewer.
+    *  While you wait, add the custom CA root certificate to
+       *  Open the Start Menu and search for "Manage user certificates" or press Windows key + R, then type `certmgr.msc` and hit Enter to open the Windows Certificate Manager.
+       *  In the left pane, navigate to Certificates - Current User > Trusted Root Certification Authorities.
+       *  In the right pane, right-click on the Certificates folder under Trusted Root Certification Authorities, go to All Tasks, and select Import.
+       *  Follow the wizard, select the root CA certificate file you want to import (in WSL `~/Docker/ssl/root.pem`), and complete the import process.
 
 Important notes about this LAMP setup:
 
@@ -111,6 +116,7 @@ Important notes about this LAMP setup:
     [http://localhost/pma](http://localhost/pma)
 *  Search-Replace DB has been installed and configured to login automatically
     [http://localhost/srdb](http://localhost/srdb)
+*  A custom CA (certificate authority) root certificate is created in `Docker/ssl`. This is used to create SSL certificates for the local sites.
 
 Set VSCode to use Ubutu as Default Terminal
 -------------------------------------------
@@ -160,33 +166,17 @@ Setup a New Site
     ```
 *  Download a database dump and import it to the local database
     ```
-    mysql -u dbuser -p databasename < dump.sql
+    mysql -u dbuser -pdbpassword -h 127.0.0.1 databasename < dump.sql
     ```
-*  Adjust Joomla's configuration.php
-    ```
-    $user = 'dbuser'
-    $password = 'dbpassword'
-    $host = '127.0.0.1'
-    $force_ssl = '0'
-    $caching = '0'
-    $cookie_domain = '[local.test domain]'
-    ```
-*  Adjust WordPress wp-config.php
+*  Adjust the CMS database settings:
     ```
     define( 'DB_USER', 'dbuser' );
     define( 'DB_PASSWORD', 'dbpassword' );
     define( 'DB_HOST', '127.0.0.1' );
     ```
-*  Adjust .htaccess
-*  Comment out
+*  In .htaccess comment out
     ```
     ModPagespeed
-    ```
-*  Comment out domain and SSL redirect, for example:
-    ```
-    RewriteCond %{HTTP_HOST} !^example.com$ [OR,NC]
-    RewriteCond %{SERVER_PORT} 80
-    RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]
     ```
 *  Fix file permissions (see details below)
 *  To allow connection from Windows using the custom local domain, modify the Windows etc/hosts file
@@ -220,6 +210,8 @@ Quirks
 
 *  When accessing the files in the WSL Ubuntu distro, the default behavior is for Linux to see you as the default user (`ubuntu`). However, I noticed that right after installing Ubuntu, the user was root. This made me think it would always be root and after I restarted my computer I had several issues with permissions.
 *  Some times MySQL will not start when the container boots. You can manually run `sudo /start.sh` from the Docker terminal to start the services again
+* When connecting to MySQL you must use host name 127.0.0.1, localhost doesn't work in Docker
+
 To Do
 -----
 

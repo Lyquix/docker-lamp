@@ -13,25 +13,43 @@ printf $DIVIDER
 # Update scripts permissions
 chmod +x scripts/*.sh
 
+# Set up root CA
+cd ssl
+if [ ! -f "root.key" ] || [ ! -f "root.pem" ]; then
+	printf $DIVIDER
+	echo "Generate root CA private key"
+	openssl genrsa -out root.key 2048
+
+	printf $DIVIDER
+	echo "Generate root certificate valid for 10 years"
+	openssl req -x509 -new -nodes -key root.key -sha256 -days 3650 -out root.pem \
+	  -subj "/C=US/ST=Pennsylvania/L=Philadelphia/O=Lyquix/CN=lyquix.com"
+fi
+cd ..
+
 # Build containers
-for COUNTER in 18 20 22; do
-	printf "Ubuntu $COUNTER.04 container...\n"
+for VERSION in 18 20 22; do
+	printf $DIVIDER
+	printf "Ubuntu $VERSION.04 container...\n"
 	printf " - Linking directories\n"
-	mkdir ubuntu$COUNTER/mysql
-	mkdir ubuntu$COUNTER/sites-available
-	mkdir ubuntu$COUNTER/www
+	mkdir ubuntu$VERSION/mysql
+	mkdir ubuntu$VERSION/sites-available
+	mkdir ubuntu$VERSION/www
+	mkdir ubuntu$VERSION/ssl
 	printf " - Copying scripts\n"
-	cp scripts/site-setup.sh ubuntu$COUNTER/www
-	cp scripts/file-permissions.sh ubuntu$COUNTER/www
+	cp scripts/site-setup.sh ubuntu$VERSION/www
+	cp scripts/file-permissions.sh ubuntu$VERSION/www
+	printf " - Copying SSL files\n"
+	cp ssl/* ubuntu$VERSION/ssl
 	printf " - Stoping and removing existing container\n"
-	docker stop ubuntu$COUNTER
-	docker rm ubuntu$COUNTER
+	docker stop ubuntu$VERSION
+	docker rm ubuntu$VERSION
 	printf " - Building new container\n"
-	docker build . -t ubuntu$COUNTER -f ubuntu$COUNTER/Dockerfile
+	docker build . -t ubuntu$VERSION -f ubuntu$VERSION/Dockerfile
 	printf " - Running container\n"
-	docker run -p 80:80 -v $SCRIPTDIR/ubuntu$COUNTER/sites-available:/etc/apache2/sites-available -v $SCRIPTDIR/ubuntu$COUNTER/www:/srv/www/ -v $SCRIPTDIR/ubuntu$COUNTER/mysql:/var/lib/mysql/ -d -t --name ubuntu$COUNTER ubuntu$COUNTER
+	docker run -p 80:80 -p 443:443 -v $SCRIPTDIR/ubuntu$VERSION/sites-available:/etc/apache2/sites-available -v $SCRIPTDIR/ubuntu$VERSION/www:/srv/www/ -v $SCRIPTDIR/ubuntu$VERSION/mysql:/var/lib/mysql/ -d -t --name ubuntu$VERSION ubuntu$VERSION
 	printf " - Stopping container\n"
-	docker stop ubuntu$COUNTER
+	docker stop ubuntu$VERSION
 	printf "Done!\n"
 done
 

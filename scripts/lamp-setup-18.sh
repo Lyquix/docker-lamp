@@ -29,7 +29,7 @@ printf "Now the script will update Ubuntu and install all the necessary software
 printf " * You will be prompted to enter the password for the MySQL root user\n"
 
 printf "Repository update...\n"
-apt-get -y update
+apt-get update --fix-missing
 printf "Upgrade installed packages...\n"
 apt-get -y upgrade
 
@@ -41,27 +41,37 @@ dpkg-reconfigure -f noninteractive tzdata
 printf "Install utilities...\n"
 PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common")
 for PCKG in "${PCKGS[@]}"; do
-	apt-get -y install ${PCKG}
+	echo "$PCKG"
+	apt-get -y -q=2 install ${PCKG}
 done
 printf "Install Apache...\n"
 PCKGS=("apache2" "libapache2-mod-php" "libapache2-mod-fcgid")
 for PCKG in "${PCKGS[@]}"; do
-	apt-get -y install ${PCKG}
+	echo "$PCKG"
+	apt-get -y -q=2 install ${PCKG}
 done
 printf "Install PHP...\n"
-PCKGS=("mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "php-auth" "php-mcrypt" "composer")
+PCKGS=("mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "php-auth" "php-mcrypt" "composer")
 for PCKG in "${PCKGS[@]}"; do
-	apt-get -y install ${PCKG}
+	echo "$PCKG"
+	apt-get -y -q=2 install ${PCKG}
 done
 printf "Install MySQL...\n"
-apt-get -y install mysql-server mysql-client
+apt-get -y -q=2 install mysql-server mysql-client
 
 # APACHE configuration
 printf $DIVIDER
 printf "APACHE CONFIGURATION\n"
 
-printf "Enabling Apache modules...\n"
-a2enmod expires headers rewrite ssl suphp mpm_prefork security2
+printf "Apache modules...\n"
+a2dismod php7.2
+a2enmod expires headers rewrite ssl suphp proxy_fcgi setenvif mpm_event http2 security2
+
+printf "Apache configurations...\n"
+HTTP2CONF='<IfModule !mpm_prefork>\n\tProtocols h2 h2c http/1.1\n</IfModule>'
+echo -e "$HTTP2CONF" > /etc/apache2/conf-available/http2.conf
+a2enconf php7.2-fpm http2
+a2disconf security
 
 if [ ! -f /etc/apache2/apache2.conf.orig ]; then
 	printf "Backing up original configuration file to /etc/apache2/apache2.conf.orig\n"
@@ -83,11 +93,6 @@ FIND="#<\/Directory>"
 REPLACE="$(
 	cat <<'EOF'
 #</Directory>
-
-# Disable HTTP 1.0
-RewriteEngine On
-RewriteCond %{THE_REQUEST} !HTTP/1.1$
-RewriteRule .* - [F]
 
 # Disable Trace HTTP request
 TraceEnable off
@@ -123,16 +128,13 @@ REPLACE="$(
     Options +FollowSymLinks -Indexes -Includes
     AllowOverride all
     Require all granted
-    #IncludeOptional /etc/apache2/custom.d/globalblacklist.conf
     Header set Access-Control-Allow-Origin "*"
     Header set Timing-Allow-Origin: "*"
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options sameorigin
-    Header unset X-Powered-By
-    Header set X-UA-Compatible "IE=edge"
     Header set X-XSS-Protection "1; mode=block"
     # Disable unused HTTP request methods
-    <LimitExcept GET POST HEAD>
+    <LimitExcept GET POST HEAD OPTIONS>
       deny from all
     </LimitExcept>
 </Directory>
@@ -176,78 +178,109 @@ FIND="DirectoryIndex"
 REPLACE="DirectoryIndex index\.php"
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
 
+# Regenerate existing virtual hosts
+echo "Regenerating existing virtual hosts"
+VIRTUALHOSTS=($(ls /etc/apache2/sites-available/*.conf | grep -vE '000-default.conf|default-ssl.conf'))
+for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
+	# Get the domain name from the configuration file
+	LOCALDOMAIN=$(awk '/ServerName/ {print $2; exit}' "$SITECONFIG")
+	DOCROOT=$(awk '/DocumentRoot/ {print $2; exit}' "$SITECONFIG")
+
+	# Regenerate the virtual host configuration
+	VIRTUALHOST="<VirtualHost *:80>
+	ServerName $LOCALDOMAIN
+	DocumentRoot $DOCROOT
+	CustomLog /dev/null combined
+	RewriteEngine On
+	RewriteCond %{HTTPS} off
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+<VirtualHost *:443>
+	ServerName $LOCALDOMAIN
+	DocumentRoot $DOCROOT
+	CustomLog /dev/null combined
+	SSLEngine on
+	SSLOptions +StrictRequire
+	SSLCertificateFile /etc/apache2/ssl/$LOCALDOMAIN.crt
+	SSLCertificateKeyFile /etc/apache2/ssl/$LOCALDOMAIN.key
+</VirtualHost>"
+	echo -e "$VIRTUALHOST" > "$SITECONFIG"
+
+	# Regenerate the SSL certificate
+	cp /etc/apache2/ssl/ssl.cnf /etc/apache2/ssl/$LOCALDOMAIN.cnf
+	sed -i "s/example\.test/$LOCALDOMAIN/g" /etc/apache2/ssl/$LOCALDOMAIN.cnf
+	openssl genrsa -out /etc/apache2/ssl/$LOCALDOMAIN.key 2048
+	openssl req -new -key /etc/apache2/ssl/$LOCALDOMAIN.key -out /etc/apache2/ssl/$LOCALDOMAIN.csr \
+		-subj "/C=US/ST=Pennsylvania/L=Philadelphia/O=Lyquix/CN=$LOCALDOMAIN"
+	openssl x509 -req -in /etc/apache2/ssl/$LOCALDOMAIN.csr -CA /etc/apache2/ssl/root.pem \
+		-CAkey /etc/apache2/ssl/root.key -CAcreateserial -out /etc/apache2/ssl/$LOCALDOMAIN.crt \
+		-days 3650 -sha256 -extfile /etc/apache2/ssl/$LOCALDOMAIN.cnf -extensions req_ext
+
+	# Enable the virtual host
+	a2ensite "$LOCALDOMAIN"
+done
+
+# Restart Apache
+service apache2 restart
+
 # PHP
 printf $DIVIDER
 printf "PHP\n"
 printf "The script will update PHP configuration\n"
 
-if [ ! -f /etc/php/7.2/apache2/php.ini.orig ]; then
-	printf "Backing up PHP.ini configuration file to /etc/php/7.2/apache2/php.ini.orig\n"
-	cp /etc/php/7.2/apache2/php.ini /etc/php/7.2/apache2/php.ini.orig
+if [ ! -f /etc/php/7.2/fpm/php.ini.orig ]; then
+	printf "Backing up PHP.ini configuration file to /etc/php/7.2/fpm/php.ini.orig\n"
+	cp /etc/php/7.2/fpm/php.ini /etc/php/7.2/fpm/php.ini.orig
 fi
 
 FIND="^\s*output_buffering\s*=\s*.*"
 REPLACE="output_buffering = Off"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*max_execution_time\s*=\s*.*"
 REPLACE="max_execution_time = 60"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*error_reporting\s*=\s*.*"
 REPLACE="error_reporting = E_ALL \& ~E_NOTICE \& ~E_STRICT \& ~E_DEPRECATED"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*log_errors_max_len\s*=\s*.*"
 REPLACE="log_errors_max_len = 0"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*post_max_size\s*=\s*.*"
 REPLACE="post_max_size = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*upload_max_filesize\s*=\s*.*"
 REPLACE="upload_max_filesize = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*short_open_tag\s*=\s*.*"
 REPLACE="short_open_tag = On"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*;\s*max_input_vars\s*=\s*.*" # this is commented in the original file
 REPLACE="max_input_vars = 5000"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 FIND="^\s*;\s*memory_limit\s*=\s*.*" # this is commented in the original file
 REPLACE="memory_limit = 1024M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/apache2/php.ini
-
-# php7.2.conf correct settings
-if [ ! -f /etc/apache2/mods-available/php7.2.conf.orig ]; then
-	printf "Backing up php7.2.conf configuration file to /etc/apache2/mods-available/php7.2.conf.orig\n"
-	cp /etc/apache2/mods-available/php7.2.conf /etc/apache2/mods-available/php7.2.conf.orig
-fi
-
-printf "Correct settings in php7.2.conf\n"
-FIND="Order Deny,Allow"
-REPLACE="# Order Deny,Allow"
-perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php7.2.conf
-
-FIND="Deny from all"
-REPLACE="# Deny from all\n\tRequire all granted"
-perl -pi -e "s/$FIND/$REPLACE/g" /etc/apache2/mods-available/php7.2.conf
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 
 # Restart Apache
-printf "Restarting Apache...\n"
+printf "Restarting PHP-FPM and Apache...\n"
+service php7.2-fpm start
 service apache2 restart
 
 # MySQL
@@ -302,13 +335,13 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
 service mysql restart
 
 # Create dbuser
-mysql -u root -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
+mysql -u root -h 127.0.0.1 -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
 printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n"
 
 # phpMyAdmin
 cd /var/www/html/
 curl -L https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-english.zip --output pma.zip
-unzip pma.zip
+unzip -q pma.zip
 mv phpMyAdmin-5.2.0-english pma
 rm pma.zip
 cd pma
@@ -324,7 +357,7 @@ printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n"
 # Search-Replace DB
 cd /var/www/html
 curl -L https://github.com/interconnectit/Search-Replace-DB/archive/refs/tags/3.1.zip --output srdb.zip
-unzip srdb.zip
+unzip -q srdb.zip
 mv Search-Replace-DB-3.1 srdb
 rm srdb.zip
 cd srdb
