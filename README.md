@@ -90,6 +90,7 @@ Setup Container
     *  Clone the Lyquix Docker LAMP repository
         ```
         sudo apt install git
+        git config core.fileMode false
         git clone https://github.com/Lyquix/docker-lamp.git Docker
         ```
     *  Execute the container setup script
