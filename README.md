@@ -25,11 +25,8 @@ Windows Subsystem for Linux
         *  UNIX username: `ubuntu`
         *  Password: `ubuntu`
         *  Retype password: `ubuntu`
-    *  Create the Docker folder
-        ```
-        mkdir /home/ubuntu/Docker
-        ```
 
+*  You can close the Ubuntu terminal
 *  Open Windows Command Prompt as Administrator
 
     *  Make sure Ubuntu is running on WSL version 2
@@ -87,6 +84,10 @@ Setup Container
         [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
         nvm install --lts
         ```
+    *  Create the Docker folder
+        ```
+        mkdir /home/ubuntu/Docker
+        ```
     *  Clone the Lyquix Docker LAMP repository
         ```
         sudo apt install git
@@ -99,12 +100,12 @@ Setup Container
         chmod +x container-setup.sh
         ./container-setup.sh
         ```
-    *  Wait for the setup to complete. On the first boot of each container the lamp-setup.sh script will be executed. The script is completely automated and will take 5 to 10 minutes to complete. You can follow progress in the container log viewer.
-    *  While you wait, add the custom CA root certificate to
+    *  This will take about 5 minutes. It will create containers for Ubuntu 18, 20 and 22. While you wait, add the custom CA root certificate to prevent getting an alert on your browser regarding the SSL certificate:
        *  Open the Start Menu and search for "Manage user certificates" or press Windows key + R, then type `certmgr.msc` and hit Enter to open the Windows Certificate Manager.
        *  In the left pane, navigate to Certificates - Current User > Trusted Root Certification Authorities.
        *  In the right pane, right-click on the Certificates folder under Trusted Root Certification Authorities, go to All Tasks, and select Import.
        *  Follow the wizard, select the root CA certificate file you want to import (in WSL `~/Docker/ssl/root.pem`), and complete the import process.
+    *  On the first boot of each container the lamp-setup.sh script will be executed. The script is completely automated and will take 5 to 10 minutes to complete. You can follow progress in the container log viewer. Please wait until this script is finished before using the container.
 
 Important notes about this LAMP setup:
 
