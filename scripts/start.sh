@@ -50,7 +50,7 @@ if [[ -f "/lamp-setup.sh" ]]; then
 	# Run the LAMP setup script
 	chmod +x /lamp-setup.sh
 	/lamp-setup.sh
-	rm /lamp-setup.sh
+	mv /lamp-setup.sh /lamp-setup.orig.sh
 fi
 
 # Apache
