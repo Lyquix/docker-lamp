@@ -36,19 +36,24 @@ while true; do
 	read -p "Fix file permissions for ALL sites [Y/N]? " FIXALL
 	case $FIXALL in
 	[Y]*) break ;;
+	[y]*) break ;;
 	[N]*) break ;;
+	[n]*) break ;;
 	*) printf "Please answer Y or N\n" ;;
 	esac
 done
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-if [[ "$FIXALL" == "Y" ]]; then
+if [ "$FIXALL" = "Y" ] || [ "$FIXALL" = "y" ]; then
 	printf "Updating file permissions for all sites, please wait...\n"
 	chown -R www-data:www-data /srv/www/*
-	chmod -R g+w,o+w /srv/www/*
-	find /srv/www/*/public_html -type d -exec chmod g+ws,o+ws {} \;
-	find /srv/www/*/public_html -name "*.sh" -type f -exec chmod +x {} \;
+	find /srv/www/*/public_html -type f -exec chmod 666 {} \;
+	find /srv/www/*/public_html -type d -exec chmod 777 {} \;
+	chmod +x /srv/www/*/public_html/wp-content/themes/*lyquix*/node_modules/.bin/*
+	chmod +x /srv/www/*/public_html/templates/*lyquix*/node_modules/.bin/*
+	find /srv/www/*/public_html/wp-content/themes/*lyquix*/ -name "*.sh" -type f -exec chmod +x {} \;
+	find /srv/www/*/public_html/templates/*lyquix*/ -name "*.sh" -type f -exec chmod +x {} \;
 else
 	printf "Please select folder:\n"
 	select DIR in */; do
@@ -57,9 +62,12 @@ else
 	done
 	printf "Updating file permissions for /srv/www/$DIR...\n"
 	chown -R www-data:www-data /srv/www/$DIR
-	chmod -R g+w,o+w /srv/www/$DIR
-	find /srv/www/$DIR/public_html -type d -exec chmod g+ws,o+ws {} \;
-	find /srv/www/$DIR/public_html -name "*.sh" -type f -exec chmod +x {} \;
+	find /srv/www/$DIR/public_html -type f -exec chmod 666 {} \;
+	find /srv/www/$DIR/public_html -type d -exec chmod 777 {} \;
+	chmod +x /srv/www/$DIR/public_html/wp-content/themes/*lyquix*/node_modules/.bin/*
+	chmod +x /srv/www/$DIR/public_html/templates/*lyquix*/node_modules/.bin/*
+	find /srv/www/$DIR/public_html/wp-content/themes/*lyquix*/ -name "*.sh" -type f -exec chmod +x {} \;
+	find /srv/www/$DIR/public_html/templates/*lyquix*/ -name "*.sh" -type f -exec chmod +x {} \;
 fi
 
 cd $CURRDIR
