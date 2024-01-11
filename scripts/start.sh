@@ -56,8 +56,8 @@ fi
 # Apache
 if service --status-all | grep -wq apache2; then
 	echo "Apache2 is installed"
-	service apache2 restart
-	service
+	service apache2 stop
+	service apache2 start
 else
 	echo "Apache2 is not installed"
 fi
@@ -66,14 +66,18 @@ fi
 for VERSION in 7.2 7.4 8.1; do
 	if service --status-all | grep -wq "php$VERSION-fpm"; then
 		echo "PHP-FPM $VERSION is installed"
-		service "php$VERSION-fpm" restart
+		service "php$VERSION-fpm" stop
+		service "php$VERSION-fpm" start
 	fi
 done
 
 # MySQL
 if service --status-all | grep -wq mysql; then
 	echo "MySQL is installed"
-	service mysql restart
+	service mysql stop
+	# Remove any previous sockets and lock files
+	rm -f /run/mysqld/mysql*
+	service mysql start
 else
 	echo "MySQL is not installed"
 fi
