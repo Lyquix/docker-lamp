@@ -110,4 +110,88 @@ mysql -u dbuser -pdbpassword -h 127.0.0.1 -e "CREATE DATABASE $DBNAME;"
 
 printf "You can now import the site database from a dump file using the command:\n\tmysql -u dbuser -pdbpassword -h 127.0.0.1 $DBNAME < dumpfile.sql\n"
 
+# Prompt to install WordPress
+read -p "Do you want to install WordPress? (y/n): " INSTALL_WP
+if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
+    # Prompt for WordPress admin details
+    read -p "Please enter the WordPress admin username: " WP_ADMIN_USER
+    while true; do
+        read -sp "Please enter the WordPress admin password: " WP_ADMIN_PASS
+        echo
+        read -sp "Please confirm the WordPress admin password: " WP_ADMIN_PASS_CONFIRM
+        echo
+        [ "$WP_ADMIN_PASS" = "$WP_ADMIN_PASS_CONFIRM" ] && break
+        echo "Passwords do not match. Please try again."
+    done
+    read -p "Please enter the WordPress admin email: " WP_ADMIN_EMAIL
+
+    # WordPress Installation and Configuration
+    WP_DB_NAME=$DBNAME
+    WP_DB_USER="dbuser"
+    WP_DB_PASS="dbpassword"
+    WP_DB_HOST="127.0.0.1"
+    WP_URL="https://$LOCALDOMAIN"
+    WP_TITLE="Your Site Title"
+    THEME_REPO="git@bitbucket.org:lyquix/wp_theme_lyquix.git"
+    THEME_DIR="lyquix"
+    PLUGINS=("aryo-activity-log" "post-smtp" "redirection" "wordpress-seo" "duplicate-post" "simple-custom-post-order" "tinymce-advanced" "html-editor-syntax-highlighter" "ewww-image-optimizer" "w3-total-cache" "wordfence") # Add the plugins you need
+
+    # Check if WP-CLI is installed
+    if ! command -v wp &> /dev/null
+    then
+        echo "WP-CLI could not be found, installing it now..."
+        curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        chmod +x wp-cli.phar
+        sudo mv wp-cli.phar /usr/local/bin/wp
+    fi
+
+    # Download and configure WordPress
+    wp core download --path=/srv/www/$PRODDOMAIN/public_html --locale=en_US --allow-root
+    cd /srv/www/$PRODDOMAIN/public_html
+
+    # Create wp-config.php
+    echo "Create wp-config.php..."
+    wp config create --dbname=$WP_DB_NAME --dbuser=$WP_DB_USER --dbpass=$WP_DB_PASS --dbhost=$WP_DB_HOST --path=. --allow-root
+
+    # Install WordPress
+    wp core install --url=$WP_URL --title="$WP_TITLE" --admin_user=$WP_ADMIN_USER --admin_password=$WP_ADMIN_PASS --admin_email=$WP_ADMIN_EMAIL --allow-root
+
+    # Set WordPress settings
+    wp option update blogdescription "Just another WordPress site" --allow-root
+    wp option update timezone_string "America/New_York" --allow-root
+    wp option update date_format "F j, Y" --allow-root
+    wp option update time_format "g:i a" --allow-root
+    wp option update permalink_structure "/%postname%/" --allow-root
+
+    # Install and configure plugins
+    for plugin in "${PLUGINS[@]}"
+    do
+        wp plugin install $plugin --activate --allow-root
+    done
+
+    # Download and configure theme from repo
+    if ! command -v git &> /dev/null
+    then
+        echo "Git is not installed. Please install Git and run the script again."
+        exit 1
+    fi
+
+#    git clone $THEME_REPO wp-content/themes/$THEME_DIR
+#    wp theme activate $THEME_DIR --allow-root
+
+    # Clean up
+    wp plugin delete hello --allow-root
+    wp plugin delete akismet --allow-root
+
+    # Set up permalinks and other settings to bypass the setup wizard
+    wp rewrite structure '/%postname%/' --hard --allow-root
+    wp rewrite flush --hard --allow-root
+    wp option update show_on_front 'page' --allow-root
+    wp option update page_on_front 2 --allow-root
+    wp option update page_for_posts 2 --allow-root
+    wp option update blog_public 1 --allow-root
+
+    echo "WordPress installation and configuration complete!"
+fi
+
 exit
