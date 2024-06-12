@@ -13,9 +13,9 @@ if ! grep -q docker /proc/1/cgroup; then
 fi
 
 DIVIDER="\n***************************************\n\n"
-DEBIAN_FRONTEND=noninteractive
-DEBCONF_NONINTERACTIVE_SEEN=true
-NEEDRESTART_MODE=a
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+export NEEDRESTART_MODE=a
 
 # Welcome and instructions
 printf $DIVIDER
@@ -28,36 +28,27 @@ printf "INSTALL AND UPDATE SOFTWARE\n"
 printf "Now the script will update Ubuntu and install all the necessary software.\n"
 printf " * You will be prompted to enter the password for the MySQL root user\n"
 
-printf "Repository update...\n"
+printf "Update package repositories...\n"
 apt-get update --fix-missing
-printf "Upgrade installed packages...\n"
-apt-get -y upgrade
+apt-get -y -qq --no-install-recommends install software-properties-common
+printf "Install apt-fast...\n"
+add-apt-repository -y ppa:apt-fast/stable
+apt-get update --fix-missing
+apt-get -y -qq --no-install-recommends install apt-fast
+
+printf "Install sudo...\n"
+apt-fast install -y -qq --no-install-recommends sudo
+printf "Add www-data user to sudoers...\n"
+echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
 printf "Setup time zone...\n"
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+apt-fast install -y --no-install-recommends tzdata
 echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
-printf "Install utilities...\n"
-PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common")
-for PCKG in "${PCKGS[@]}"; do
-	echo "$PCKG"
-	apt-get -y -q=2 install ${PCKG}
-done
-printf "Install Apache...\n"
-PCKGS=("apache2" "libapache2-mod-php" "libapache2-mod-fcgid")
-for PCKG in "${PCKGS[@]}"; do
-	echo "$PCKG"
-	apt-get -y -q=2 install ${PCKG}
-done
-printf "Install PHP...\n"
-PCKGS=("mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "php-auth" "php-mcrypt" "composer")
-for PCKG in "${PCKGS[@]}"; do
-	echo "$PCKG"
-	apt-get -y -q=2 install ${PCKG}
-done
-printf "Install MySQL...\n"
-apt-get -y -q=2 install mysql-server mysql-client
+printf "Install software...\n"
+PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "composer" "mysql-server" "mysql-client")
+apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
 printf $DIVIDER
@@ -194,6 +185,7 @@ for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	SetEnv WPCONFIG_ENVNAME local
 </VirtualHost>
 <VirtualHost *:443>
 	ServerName $LOCALDOMAIN
@@ -203,6 +195,7 @@ for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
 	SSLOptions +StrictRequire
 	SSLCertificateFile /etc/apache2/ssl/$LOCALDOMAIN.crt
 	SSLCertificateKeyFile /etc/apache2/ssl/$LOCALDOMAIN.key
+	SetEnv WPCONFIG_ENVNAME local
 </VirtualHost>"
 	echo -e "$VIRTUALHOST" > "$SITECONFIG"
 
@@ -330,6 +323,9 @@ FIND="^\s*#\s*long_query_time\s*=\s*.*" # commented by default
 REPLACE="long_query_time=1"
 printf "my.cnf: $REPLACE\n"
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
+
+# Set the home directory for the mysql user
+usermod -d /var/lib/mysql/ mysql
 
 # Restart MySQL
 service mysql restart

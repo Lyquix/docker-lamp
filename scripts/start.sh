@@ -41,46 +41,47 @@ check_directory_mounted "/srv/www"
 check_directory_mounted "/etc/apache2/sites-available"
 check_directory_mounted "/var/lib/mysql"
 
-# Check if the script /lamp-setup.sh exists
-if [[ -f "/lamp-setup.sh" ]]; then
-	echo "Please wait for the LAMP setup script to start..."
-	# Sleep for 15 seconds to prevent execution during container creation
-	sleep 15
-
-	# Run the LAMP setup script
-	chmod +x /lamp-setup.sh
-	/lamp-setup.sh
-	mv /lamp-setup.sh /lamp-setup.orig.sh
-fi
-
 # Apache
 if service --status-all | grep -wq apache2; then
 	echo "Apache2 is installed"
+	service apache2 status
 	service apache2 stop
 	service apache2 start
+	service apache2 status
 else
 	echo "Apache2 is not installed"
 fi
 
 # PHP-FPM
-for VERSION in 7.2 7.4 8.1; do
+for VERSION in 7.2 7.4 8.1 8.3; do
 	if service --status-all | grep -wq "php$VERSION-fpm"; then
 		echo "PHP-FPM $VERSION is installed"
+		service "php$VERSION-fpm" status
 		service "php$VERSION-fpm" stop
 		service "php$VERSION-fpm" start
+		service "php$VERSION-fpm" status
+	else
+		echo "PHP-FPM $VERSION is not installed"
 	fi
 done
 
 # MySQL
 if service --status-all | grep -wq mysql; then
 	echo "MySQL is installed"
+	service mysql status
 	service mysql stop
+
+	# Kill any existing mysqld process
+	killall -9 mysqld
+
 	# Remove any previous sockets and lock files
 	rm -f /run/mysqld/mysql*
+
 	service mysql start
+	service mysql status
 else
 	echo "MySQL is not installed"
 fi
 
-# Add a user prompt loop to allow the user to decide when to exit
-read -p "Press enter to quit the script: " input
+# Prevent the container from exiting by tailing a log file
+tail -f /var/log/apache2/access.log

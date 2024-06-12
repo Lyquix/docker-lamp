@@ -21,3 +21,7 @@ Desktop.ini
 /ubuntu22/sites-available
 /ubuntu22/ssl
 /ubuntu22/www
+/ubuntu24/mysql
+/ubuntu24/sites-available
+/ubuntu24/ssl
+/ubuntu24/www

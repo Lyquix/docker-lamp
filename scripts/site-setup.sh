@@ -57,6 +57,7 @@ VIRTUALHOST="<VirtualHost *:80>
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	SetEnv WPCONFIG_ENVNAME local
 </VirtualHost>
 <VirtualHost *:443>
 	ServerName $LOCALDOMAIN
@@ -66,6 +67,7 @@ VIRTUALHOST="<VirtualHost *:80>
 	SSLOptions +StrictRequire
 	SSLCertificateFile /etc/apache2/ssl/$LOCALDOMAIN.crt
 	SSLCertificateKeyFile /etc/apache2/ssl/$LOCALDOMAIN.key
+	SetEnv WPCONFIG_ENVNAME local
 </VirtualHost>"
 echo -e "$VIRTUALHOST" > /etc/apache2/sites-available/$LOCALDOMAIN.conf
 

@@ -12,13 +12,10 @@ COPY scripts/start.sh /start.sh
 COPY ssl/ssl.cnf /etc/apache2/ssl/ssl.cnf
 COPY ssl/root.pem /etc/apache2/ssl/root.pem
 COPY ssl/root.key /etc/apache2/ssl/root.key
-RUN chmod +x /lamp-setup.sh
 RUN chmod +x /start.sh
+RUN chmod +x /lamp-setup.sh
+RUN /lamp-setup.sh
 
-# Install sudo and set www-data as sudoer
-RUN apt update
-RUN apt install -y sudo
-RUN echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
 # Run the start script on every boot
 CMD /usr/bin/sudo /start.sh

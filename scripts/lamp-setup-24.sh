@@ -19,7 +19,7 @@ export NEEDRESTART_MODE=a
 
 # Welcome and instructions
 printf $DIVIDER
-printf "Lyquix LAMP server setup on Ubuntu 22.04\n"
+printf "Lyquix LAMP server setup on Ubuntu 24.04\n"
 printf $DIVIDER
 
 # Install and update software
@@ -47,7 +47,7 @@ echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
-PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php8.1" "php8.1-common" "php8.1-gd" "php8.1-imap" "php8.1-mysql" "php8.1-mysqli" "php8.1-cli" "php8.1-cgi" "php8.1-fpm" "php8.1-zip" "php-pear" "php-imagick" "php8.1-curl" "php8.1-mbstring" "php8.1-bcmath" "php8.1-xml" "php8.1-soap" "php8.1-opcache" "php8.1-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php8.1-dev" "libapache2-mod-php8.1" "composer" "mysql-server" "mysql-client")
+PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php8.3" "php8.3-common" "php8.3-gd" "php8.3-imap" "php8.3-mysql" "php8.3-mysqli" "php8.3-cli" "php8.3-cgi" "php8.3-fpm" "php8.3-zip" "php-pear" "php-imagick" "php8.3-curl" "php8.3-mbstring" "php8.3-bcmath" "php8.3-xml" "php8.3-soap" "php8.3-opcache" "php8.3-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php8.3-dev" "libapache2-mod-php8.3" "composer" "mysql-server" "mysql-client")
 apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
@@ -55,11 +55,11 @@ printf $DIVIDER
 printf "APACHE CONFIGURATION\n"
 
 printf "Apache modules...\n"
-a2dismod php8.1
+a2dismod php8.3
 a2enmod expires headers rewrite ssl suphp proxy_fcgi setenvif mpm_event http2 security2
 
 printf "Apache configurations...\n"
-a2enconf php8.1-fpm
+a2enconf php8.3-fpm
 a2disconf security apache2-conf
 
 if [ ! -f /etc/apache2/apache2.conf.orig ]; then
@@ -219,59 +219,59 @@ printf $DIVIDER
 printf "PHP\n"
 printf "The script will update PHP configuration\n"
 
-if [ ! -f /etc/php/8.1/fpm/php.ini.orig ]; then
-	printf "Backing up PHP.ini configuration file to /etc/php/8.1/fpm/php.ini.orig\n"
-	cp /etc/php/8.1/fpm/php.ini /etc/php/8.1/fpm/php.ini.orig
+if [ ! -f /etc/php/8.3/fpm/php.ini.orig ]; then
+	printf "Backing up PHP.ini configuration file to /etc/php/8.3/fpm/php.ini.orig\n"
+	cp /etc/php/8.3/fpm/php.ini /etc/php/8.3/fpm/php.ini.orig
 fi
 
 FIND="^\s*output_buffering\s*=\s*.*"
 REPLACE="output_buffering = Off"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*max_execution_time\s*=\s*.*"
 REPLACE="max_execution_time = 60"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*error_reporting\s*=\s*.*"
 REPLACE="error_reporting = E_ALL \& ~E_NOTICE \& ~E_STRICT \& ~E_DEPRECATED"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*log_errors_max_len\s*=\s*.*"
 REPLACE="log_errors_max_len = 0"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*post_max_size\s*=\s*.*"
 REPLACE="post_max_size = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*upload_max_filesize\s*=\s*.*"
 REPLACE="upload_max_filesize = 100M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*short_open_tag\s*=\s*.*"
 REPLACE="short_open_tag = On"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*;\s*max_input_vars\s*=\s*.*" # this is commented in the original file
 REPLACE="max_input_vars = 5000"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 FIND="^\s*;\s*memory_limit\s*=\s*.*" # this is commented in the original file
 REPLACE="memory_limit = 1024M"
 printf "php.ini: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.1/fpm/php.ini
+perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/8.3/fpm/php.ini
 
 # Restart Apache
 printf "Restarting PHP-FPM and Apache...\n"
-service php8.1-fpm start
+service php8.3-fpm start
 service apache2 restart
 
 # MySQL
@@ -329,7 +329,7 @@ usermod -d /var/lib/mysql/ mysql
 service mysql restart
 
 # Create dbuser
-mysql -u root -h 127.0.0.1 -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
+mysql -u root -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
 printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n"
 
 # phpMyAdmin
