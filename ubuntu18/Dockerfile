@@ -8,6 +8,7 @@ RUN mkdir -p /var/lib/mysql
 
 # Copy scripts and set permission to execute
 COPY scripts/lamp-setup-18.sh /lamp-setup.sh
+COPY scripts/lamp-setup-first-boot.sh /lamp-setup-first-boot.sh
 COPY scripts/start.sh /start.sh
 COPY ssl/ssl.cnf /etc/apache2/ssl/ssl.cnf
 COPY ssl/root.pem /etc/apache2/ssl/root.pem

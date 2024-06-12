@@ -41,6 +41,12 @@ check_directory_mounted "/srv/www"
 check_directory_mounted "/etc/apache2/sites-available"
 check_directory_mounted "/var/lib/mysql"
 
+# Check if first-boot.lock file doesn't exist
+if [ ! -f /lamp-setup-first-boot.lock ]; then
+	# Run first boot script
+	/bin/bash /lamp-setup-first-boot.sh
+fi
+
 # Apache
 if service --status-all | grep -wq apache2; then
 	echo "Apache2 is installed"
@@ -71,11 +77,9 @@ if service --status-all | grep -wq mysql; then
 	service mysql status
 	service mysql stop
 
-	# Kill any existing mysqld process
-	killall -9 mysqld
-
-	# Remove any previous sockets and lock files
-	rm -f /run/mysqld/mysql*
+	# Remove any previous processes, sockets and lock files
+	killall -9 mysqld mysqld_safe
+	rm -f /run/mysqld/*
 
 	service mysql start
 	service mysql status
