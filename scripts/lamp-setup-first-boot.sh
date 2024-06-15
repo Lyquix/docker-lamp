@@ -19,7 +19,7 @@ export NEEDRESTART_MODE=a
 
 printf "Install MySQL...\n"
 PCKGS=("mysql-server" "mysql-client")
-apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
+apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # MySQL
 printf $DIVIDER

@@ -29,8 +29,8 @@ printf "Now the script will update Ubuntu and install all the necessary software
 printf " * You will be prompted to enter the password for the MySQL root user\n"
 
 printf "Update package repositories...\n"
-apt-get update --fix-missing
-apt-get -y -qq --no-install-recommends install software-properties-common sudo curl wget
+apt-get -y -q update --fix-missing
+apt-get -y -q --no-install-recommends install software-properties-common sudo curl wget
 printf "Install apt-fast...\n"
 /bin/bash -c "$(curl -sL https://git.io/vokNn)"
 
@@ -38,13 +38,13 @@ printf "Add www-data user to sudoers...\n"
 echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
 printf "Setup time zone...\n"
-apt-fast install -y --no-install-recommends tzdata
+apt-fast -y -q -no-install-recommends install tzdata
 echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
 PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.2-dev" "libapache2-mod-php7.2" "composer")
-apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
+apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
 printf $DIVIDER

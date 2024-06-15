@@ -29,8 +29,8 @@ printf "Now the script will update Ubuntu and install all the necessary software
 printf " * You will be prompted to enter the password for the MySQL root user\n"
 
 printf "Update package repositories...\n"
-apt-get update --fix-missing
-apt-get -y -qq --no-install-recommends install software-properties-common sudo curl wget
+apt-get -y -q update --fix-missing
+apt-get -y -q --no-install-recommends install software-properties-common sudo curl wget
 printf "Install apt-fast...\n"
 /bin/bash -c "$(curl -sL https://git.io/vokNn)"
 
@@ -38,13 +38,13 @@ printf "Add www-data user to sudoers...\n"
 echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
 printf "Setup time zone...\n"
-apt-fast install -y --no-install-recommends tzdata
+apt-fast -y -q -no-install-recommends install tzdata
 echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
 PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.4" "php7.4-common" "php7.4-gd" "php7.4-imap" "php7.4-mysql" "php7.4-mysqli" "php7.4-cli" "php7.4-cgi" "php7.4-fpm" "php7.4-zip" "php-pear" "php-imagick" "php7.4-curl" "php7.4-mbstring" "php7.4-bcmath" "php7.4-xml" "php7.4-soap" "php7.4-opcache" "php7.4-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.4-dev" "libapache2-mod-php7.4" "composer")
-apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
+apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
 printf $DIVIDER
