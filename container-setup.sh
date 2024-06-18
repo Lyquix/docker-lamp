@@ -27,6 +27,13 @@ if [ ! -f "root.key" ] || [ ! -f "root.pem" ]; then
 fi
 cd ..
 
+# Generate SSH key
+echo " - Generating SSH key"
+mkdir -p ssh
+if [ ! -f ssh/id_rsa ]; then
+	ssh-keygen -t rsa -b 2048 -f ssh/id_rsa -N ""
+fi
+
 # Use whiptail to create a checkbox list
 CHOICES=$(whiptail --separate-output --title "Select the Docker LAMP instances to create" --checklist "Select VERSIONS:" 10 60 4 \
 	"18" "Ubuntu 18.04" on \
@@ -92,10 +99,13 @@ for VERSION in "${VERSIONS[@]}"; do
 
 	# Create the Docker container instance
 	echo " - Creating instance..."
-	docker create -p 80:80 -p 443:443 -v $SCRIPTDIR/ubuntu$VERSION/sites-available:/etc/apache2/sites-available/ -v $SCRIPTDIR/ubuntu$VERSION/www:/srv/www/ -v $SCRIPTDIR/ubuntu$VERSION/mysql:/var/lib/mysql/ -t --name ubuntu$VERSION $IMAGENAME
+	docker create -p 80:80 -p 443:443 -v $SCRIPTDIR/ubuntu$VERSION/sites-available:/etc/apache2/sites-available/ -v $SCRIPTDIR/ubuntu$VERSION/www:/srv/www/ -v $SCRIPTDIR/ubuntu$VERSION/mysql:/var/lib/mysql/ -v $SCRIPTDIR/ssh:/srv/www/ssh -t --name ubuntu$VERSION $IMAGENAME
 
 	echo " - Done!"
 done
+
+echo " - SSH public key (add this to Bitbucket):"
+cat ssh/id_rsa.pub
 
 cd ${CURRDIR}
 
