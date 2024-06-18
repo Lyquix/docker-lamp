@@ -77,9 +77,17 @@ for VERSION in "${VERSIONS[@]}"; do
 
 	if docker inspect --format='{{.Id}}' "$IMAGENAME" 2>/dev/null; then
 		echo " - Image $IMAGENAME already exists"
+
+		# Prompt user if they want to rebuild the image
+		read -p "Rebuild the image? [Y/N] " REBUILD
+		case $REBUILD in
+			[Yy]) docker build . -t "$IMAGENAME" -f ubuntu$VERSION/Dockerfile --pull --no-cache ;;
+			*) break ;;
+		esac
+
 	else
 		echo " - Building image $IMAGENAME..."
-		docker build . -t "$IMAGENAME" -f ubuntu$VERSION/Dockerfile
+		docker build . -t "$IMAGENAME" -f ubuntu$VERSION/Dockerfile --pull --no-cache
 	fi
 
 	# Create the Docker container instance

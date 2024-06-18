@@ -17,9 +17,20 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
+# Create the default virtual hosts
+VIRTUALHOST="<VirtualHost *:80>
+	DocumentRoot /var/www/html
+	CustomLog /dev/null combined
+</VirtualHost>"
+echo -e "$VIRTUALHOST" >/etc/apache2/sites-available/000-default.conf
+a2ensite 000-default.conf
+
+# Delete the default SSL virtual host
+rm /etc/apache2/sites-available/default-ssl.conf
+
 # Regenerate existing virtual hosts
 echo "Regenerating existing virtual hosts"
-VIRTUALHOSTS=($(ls /etc/apache2/sites-available/*.conf | grep -vE '000-default.conf|default-ssl.conf'))
+VIRTUALHOSTS=($(ls /etc/apache2/sites-available/*.conf | grep -vE '000-default.conf'))
 for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
 	# Get the domain name from the configuration file
 	LOCALDOMAIN=$(awk '/ServerName/ {print $2; exit}' "$SITECONFIG")
@@ -45,9 +56,9 @@ for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
 	SSLCertificateKeyFile /etc/apache2/ssl/$LOCALDOMAIN.key
 	SetEnv WPCONFIG_ENVNAME local
 </VirtualHost>"
-	echo -e "$VIRTUALHOST" > "$SITECONFIG"
+	echo -e "$VIRTUALHOST" >"$SITECONFIG"
 
-	# Regenerate the SSL certificate
+	# Regenerate the SSL certificates
 	cp /etc/apache2/ssl/ssl.cnf /etc/apache2/ssl/$LOCALDOMAIN.cnf
 	sed -i "s/example\.test/$LOCALDOMAIN/g" /etc/apache2/ssl/$LOCALDOMAIN.cnf
 	openssl genrsa -out /etc/apache2/ssl/$LOCALDOMAIN.key 2048

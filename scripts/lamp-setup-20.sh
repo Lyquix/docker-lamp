@@ -29,26 +29,22 @@ printf "Now the script will update Ubuntu and install all the necessary software
 printf " * You will be prompted to enter the password for the MySQL root user\n"
 
 printf "Update package repositories...\n"
-apt-get update --fix-missing
-apt-get -y -qq --no-install-recommends install software-properties-common
+apt-get -y -q update --fix-missing
+apt-get -y -q --no-install-recommends install software-properties-common sudo curl wget
 printf "Install apt-fast...\n"
-add-apt-repository -y ppa:apt-fast/stable
-apt-get update --fix-missing
-apt-get -y -qq --no-install-recommends install apt-fast
+/bin/bash -c "$(curl -sL https://git.io/vokNn)"
 
-printf "Install sudo...\n"
-apt-fast install -y -qq --no-install-recommends sudo
 printf "Add www-data user to sudoers...\n"
 echo "www-data    ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
 
 printf "Setup time zone...\n"
-apt-fast install -y --no-install-recommends tzdata
+apt-fast -y -q -no-install-recommends install tzdata
 echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
-PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.4" "php7.4-common" "php7.4-gd" "php7.4-imap" "php7.4-mysql" "php7.4-mysqli" "php7.4-cli" "php7.4-cgi" "php7.4-fpm" "php7.4-zip" "php-pear" "php-imagick" "php7.4-curl" "php7.4-mbstring" "php7.4-bcmath" "php7.4-xml" "php7.4-soap" "php7.4-opcache" "php7.4-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.4-dev" "libapache2-mod-php7.4" "composer" "mysql-server" "mysql-client")
-apt-fast -y -qq --no-install-recommends install ${PCKGS[@]}
+PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.4" "php7.4-common" "php7.4-gd" "php7.4-imap" "php7.4-mysql" "php7.4-mysqli" "php7.4-cli" "php7.4-cgi" "php7.4-fpm" "php7.4-zip" "php-pear" "php-imagick" "php7.4-curl" "php7.4-mbstring" "php7.4-bcmath" "php7.4-xml" "php7.4-soap" "php7.4-opcache" "php7.4-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php7.4-dev" "libapache2-mod-php7.4" "composer")
+apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
 printf $DIVIDER
@@ -167,53 +163,6 @@ FIND="DirectoryIndex"
 REPLACE="DirectoryIndex index\.php"
 perl -pi -e "s/$FIND/$REPLACE/m" /etc/apache2/mods-available/dir.conf
 
-# Regenerate existing virtual hosts
-echo "Regenerating existing virtual hosts"
-VIRTUALHOSTS=($(ls /etc/apache2/sites-available/*.conf | grep -vE '000-default.conf|default-ssl.conf'))
-for SITECONFIG in "${VIRTUALHOSTS[@]}"; do
-	# Get the domain name from the configuration file
-	LOCALDOMAIN=$(awk '/ServerName/ {print $2; exit}' "$SITECONFIG")
-	DOCROOT=$(awk '/DocumentRoot/ {print $2; exit}' "$SITECONFIG")
-
-	# Regenerate the virtual host configuration
-	VIRTUALHOST="<VirtualHost *:80>
-	ServerName $LOCALDOMAIN
-	DocumentRoot $DOCROOT
-	CustomLog /dev/null combined
-	RewriteEngine On
-	RewriteCond %{HTTPS} off
-	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-	SetEnv WPCONFIG_ENVNAME local
-</VirtualHost>
-<VirtualHost *:443>
-	ServerName $LOCALDOMAIN
-	DocumentRoot $DOCROOT
-	CustomLog /dev/null combined
-	SSLEngine on
-	SSLOptions +StrictRequire
-	SSLCertificateFile /etc/apache2/ssl/$LOCALDOMAIN.crt
-	SSLCertificateKeyFile /etc/apache2/ssl/$LOCALDOMAIN.key
-	SetEnv WPCONFIG_ENVNAME local
-</VirtualHost>"
-	echo -e "$VIRTUALHOST" > "$SITECONFIG"
-
-	# Regenerate the SSL certificate
-	cp /etc/apache2/ssl/ssl.cnf /etc/apache2/ssl/$LOCALDOMAIN.cnf
-	sed -i "s/example\.test/$LOCALDOMAIN/g" /etc/apache2/ssl/$LOCALDOMAIN.cnf
-	openssl genrsa -out /etc/apache2/ssl/$LOCALDOMAIN.key 2048
-	openssl req -new -key /etc/apache2/ssl/$LOCALDOMAIN.key -out /etc/apache2/ssl/$LOCALDOMAIN.csr \
-		-subj "/C=US/ST=Pennsylvania/L=Philadelphia/O=Lyquix/CN=$LOCALDOMAIN"
-	openssl x509 -req -in /etc/apache2/ssl/$LOCALDOMAIN.csr -CA /etc/apache2/ssl/root.pem \
-		-CAkey /etc/apache2/ssl/root.key -CAcreateserial -out /etc/apache2/ssl/$LOCALDOMAIN.crt \
-		-days 3650 -sha256 -extfile /etc/apache2/ssl/$LOCALDOMAIN.cnf
-	openssl x509 -req -in /etc/apache2/ssl/$LOCALDOMAIN.csr -CA /etc/apache2/ssl/root.pem \
-		-CAkey /etc/apache2/ssl/root.key -CAcreateserial -out /etc/apache2/ssl/$LOCALDOMAIN.crt \
-		-days 3650 -sha256 -extfile /etc/apache2/ssl/$LOCALDOMAIN.cnf -extensions req_ext
-
-	# Enable the virtual host
-	a2ensite "$LOCALDOMAIN"
-done
-
 # Restart Apache
 service apache2 restart
 
@@ -276,64 +225,6 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/fpm/php.ini
 printf "Restarting PHP-FPM and Apache...\n"
 service php7.4-fpm start
 service apache2 restart
-
-# MySQL
-printf $DIVIDER
-printf "MYSQL\n"
-printf "The script will update MySQL and setup intial databases\n"
-
-if [ ! -f /etc/mysql/mysql.conf.d/mysqld.cnf.orig ]; then
-	printf "Backing up my.cnf configuration file to /etc/mysql/mysql.conf.d/mysqld.cnf.orig\n"
-	cp /etc/mysql/mysql.conf.d/mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf.orig
-fi
-
-printf "Updating configuration\n"
-
-FIND="^\s*key_buffer\s*=\s*.*"
-REPLACE="key_buffer=16M"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*max_allowed_packet\s*=\s*.*"
-REPLACE="max_allowed_packet=16M"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*thread_stack\s*=\s*.*"
-REPLACE="thread_stack=192K"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*thread_cache_size\s*=\s*.*"
-REPLACE="thread_cache_size=8"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*#\s*table_cache\s*=\s*.*" # commented by default
-REPLACE="table_cache=64"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*#\s*log_slow_queries\s*=\s*.*" # commented by default
-REPLACE="log_slow_queries = /var/log/mysql/mysql-slow.log"
-printf "my.cnf: $REPLACE\n"
-REPLACE=${REPLACE//\//\\\/} # Escape the / characters
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-FIND="^\s*#\s*long_query_time\s*=\s*.*" # commented by default
-REPLACE="long_query_time=1"
-printf "my.cnf: $REPLACE\n"
-perl -pi -e "s/$FIND/$REPLACE/m" /etc/mysql/mysql.conf.d/mysqld.cnf
-
-# Set the home directory for the mysql user
-usermod -d /var/lib/mysql/ mysql
-
-# Restart MySQL
-service mysql restart
-
-# Create dbuser
-mysql -u root -h 127.0.0.1 -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
-printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n"
 
 # phpMyAdmin
 cd /var/www/html/
