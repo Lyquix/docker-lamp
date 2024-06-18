@@ -3,10 +3,14 @@
 Thumbs.db
 Desktop.ini
 *Zone.Identifier
+.idea
 
 # Root CA
 /ssl/root.key
 /ssl/root.pem
+
+# SSH
+/ssh
 
 # Container Data
 /ubuntu18/mysql

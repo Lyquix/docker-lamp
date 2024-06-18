@@ -1,5 +1,6 @@
 #!/bin/bash
 
+CURRDIR="${PWD}"
 # Check if --no-sudo was passed
 NO_SUDO=0
 for PARAM in "$@"; do
@@ -205,17 +206,25 @@ echo -e "$GITIGNORE" >/srv/www/$PRODDOMAIN/public_html/.gitignore
 # Prompt to install WordPress
 read -p "Do you want to install WordPress? (y/n): " INSTALL_WP
 if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
-    # Prompt for WordPress admin details
-    read -p "Please enter the WordPress admin username: " WP_ADMIN_USER
-    while true; do
-        read -sp "Please enter the WordPress admin password: " WP_ADMIN_PASS
-        echo
-        read -sp "Please confirm the WordPress admin password: " WP_ADMIN_PASS_CONFIRM
-        echo
-        [ "$WP_ADMIN_PASS" = "$WP_ADMIN_PASS_CONFIRM" ] && break
-        echo "Passwords do not match. Please try again."
-    done
+
+    # Set default admin username
+    WP_ADMIN_USER="admin"
+
+    # Generate random password
+    WP_ADMIN_PASS=$(openssl rand -base64 16)
+    echo "Generated WordPress admin password: $WP_ADMIN_PASS"
+
+    # Prompt for WordPress admin email
     read -p "Please enter the WordPress admin email: " WP_ADMIN_EMAIL
+
+    # Prompt for Site Title
+    read -p "Please enter the Site Title: " WP_TITLE
+
+    # Prompt for Tagline
+    read -p "Please enter the Tagline: " WP_TAGLINE
+
+    # Prompt for Blog page name
+    read -p "Please enter the Blog page name (e.g. Blog, News, Updates, etc.): " BLOG_PAGE_NAME
 
     # WordPress Installation and Configuration
     WP_DB_NAME=$DBNAME
@@ -223,9 +232,9 @@ if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
     WP_DB_PASS="dbpassword"
     WP_DB_HOST="127.0.0.1"
     WP_URL="https://$LOCALDOMAIN"
-    WP_TITLE="Your Site Title"
     THEME_REPO="git@bitbucket.org:lyquix/wp_theme_lyquix.git"
     THEME_DIR="lyquix"
+    THEME_BRANCH="3.x-dev"
     PLUGINS=("aryo-activity-log" "post-smtp" "redirection" "wordpress-seo" "duplicate-post" "simple-custom-post-order" "tinymce-advanced" "html-editor-syntax-highlighter" "ewww-image-optimizer" "w3-total-cache" "wordfence") # Add the plugins you need
 
     # Check if WP-CLI is installed
@@ -236,6 +245,12 @@ if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
         chmod +x wp-cli.phar
         sudo mv wp-cli.phar /usr/local/bin/wp
     fi
+
+    # Create wp-cli.yml with the apache_modules configuration
+        cat > wp-cli.yml << EOF
+apache_modules:
+  - mod_rewrite
+EOF
 
     # Download and configure WordPress
     wp core download --path=/srv/www/$PRODDOMAIN/public_html --locale=en_US --allow-root
@@ -249,11 +264,11 @@ if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
     wp core install --url=$WP_URL --title="$WP_TITLE" --admin_user=$WP_ADMIN_USER --admin_password=$WP_ADMIN_PASS --admin_email=$WP_ADMIN_EMAIL --allow-root
 
     # Set WordPress settings
-    wp option update blogdescription "Just another WordPress site" --allow-root
+    wp option update blogdescription "$WP_TAGLINE" --allow-root
     wp option update timezone_string "America/New_York" --allow-root
     wp option update date_format "F j, Y" --allow-root
     wp option update time_format "g:i a" --allow-root
-    wp option update permalink_structure "/%postname%/" --allow-root
+    wp option update rss_use_excerpt 1 --allow-root
 
     # Install and configure plugins
     for plugin in "${PLUGINS[@]}"
@@ -268,20 +283,52 @@ if [ "$INSTALL_WP" != "${INSTALL_WP#[Yy]}" ]; then
         exit 1
     fi
 
-#    git clone $THEME_REPO wp-content/themes/$THEME_DIR
-#    wp theme activate $THEME_DIR --allow-root
+    # Ensure OpenSSH is installed
+    if ! command -v ssh &> /dev/null
+    then
+        echo "OpenSSH is not installed, installing it now..."
+        sudo apt-get update
+        sudo apt-get install -y openssh-client
+    fi
+
+    # Ensure SSH key is available and start SSH agent
+    eval "$(ssh-agent -s)"
+    sudo chmod 644 $CURRDIR/ssh/id_rsa
+    ssh-add $CURRDIR/ssh/id_rsa
+
+    # Clone the theme repository
+    git clone --branch $THEME_BRANCH $THEME_REPO wp-content/themes/$THEME_DIR
+    wp theme activate $THEME_DIR --allow-root
+
+    # Revert ssh permissions
+    sudo chmod 600 $CURRDIR/ssh/id_rsa
+
+    # Remove default themes
+    wp theme delete twentytwentyfour --allow-root
+    wp theme delete twentytwentythree --allow-root
+    wp theme delete twentytwentytwo --allow-root
 
     # Clean up
     wp plugin delete hello --allow-root
     wp plugin delete akismet --allow-root
 
+    # Create Home and Blog pages
+    HOME_PAGE_ID=$(wp post create --post_type=page --post_title='Home' --post_status=publish --porcelain --allow-root)
+    BLOG_PAGE_ID=$(wp post create --post_type=page --post_title="$BLOG_PAGE_NAME" --post_status=publish --porcelain --allow-root)
+    BLOG_PAGE_SLUG=$(wp post get $BLOG_PAGE_ID --field=post_name --allow-root)
+
     # Set up permalinks and other settings to bypass the setup wizard
-    wp rewrite structure '/%postname%/' --hard --allow-root
+    wp rewrite structure "/$BLOG_PAGE_SLUG/%postname%/" --hard --allow-root
     wp rewrite flush --hard --allow-root
     wp option update show_on_front 'page' --allow-root
-    wp option update page_on_front 2 --allow-root
-    wp option update page_for_posts 2 --allow-root
+    wp option update page_on_front $HOME_PAGE_ID --allow-root
+    wp option update page_for_posts $BLOG_PAGE_ID --allow-root
     wp option update blog_public 1 --allow-root
+
+    # Update .htaccess
+    wp rewrite flush --allow-root
+
+    sudo chmod +x wp-content/themes/$THEME_DIR/postinstall.sh && wp-content/themes/$THEME_DIR/postinstall.sh
 
     echo "WordPress installation and configuration complete!"
 fi
