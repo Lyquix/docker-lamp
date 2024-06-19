@@ -51,7 +51,7 @@ printf $DIVIDER
 printf "APACHE CONFIGURATION\n"
 
 printf "Apache modules...\n"
-a2dismod php7.2
+a2dismod php7.2 mpm_prefork
 a2enmod expires headers rewrite ssl suphp proxy_fcgi setenvif mpm_event http2 security2
 
 printf "Apache configurations...\n"
@@ -257,5 +257,6 @@ printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n"
 # Initial file permissions
 chown -R www-data:www-data /srv/www
 chmod -R g+w,o+w /srv/www
+chown -R www-data:www-data /var/www
 
 exit
