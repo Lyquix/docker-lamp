@@ -24,6 +24,10 @@ if [ ! -f "root.key" ] || [ ! -f "root.pem" ]; then
 	echo "Generate root certificate valid for 10 years"
 	openssl req -x509 -new -nodes -key root.key -sha256 -days 3650 -out root.pem \
 		-subj "/C=US/ST=Pennsylvania/L=Philadelphia/O=Lyquix/CN=lyquix.com"
+	
+	echo "Copying the root certificate to WSL Trust Store"
+	sudo cp ${SCRIPTDIR}/ssl/root.pem /usr/local/share/ca-certificates/lyquix.crt
+	sudo update-ca-certificates
 fi
 cd ..
 
