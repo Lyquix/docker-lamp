@@ -63,6 +63,7 @@ for VERSION in "${VERSIONS[@]}"; do
 	cp scripts/site-setup.sh ubuntu$VERSION/www
 	cp scripts/file-permissions.sh ubuntu$VERSION/www
 	cp scripts/regen-vhosts.sh ubuntu$VERSION/www
+	cp scripts/toggle-xdebug.sh ubuntu$VERSION/www
 
 	echo " - Copying SSL files"
 	cp ssl/* ubuntu$VERSION/ssl
