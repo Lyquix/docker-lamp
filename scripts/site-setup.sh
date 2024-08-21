@@ -144,7 +144,6 @@ node_modules/
 /Search-Replace-DB-master/
 /sitemap.xml
 /sitemap.xml.gz
-vendor/
 
 # Log files
 *.log
