@@ -252,7 +252,6 @@ EOF
 	WP_DB_PREFIX="$(tr -dc a-z </dev/urandom | head -c 1)$(tr -dc a-z0-9 </dev/urandom | head -c 5)_"
 	WP_URL="https://$LOCALDOMAIN"
 	PLUGINS=(
-		"https://github.com/pronamic/advanced-custom-fields-pro/archive/refs/heads/main.zip"
 		"aryo-activity-log"
 		"post-smtp" "redirection"
 		"wordpress-seo"
@@ -263,6 +262,11 @@ EOF
 		"ewww-image-optimizer"
 		"w3-total-cache"
 		"wordfence"
+		"zero-spam"
+		# ACF Pro
+		"https://github.com/pronamic/advanced-custom-fields-pro/archive/refs/heads/main.zip"
+		# ACF Extended Pro Phone Number Addon
+		"https://www.acf-extended.com/addons/acf-extended-pro-libphonenumber.zip"
 	)
 
 	# Check if WP-CLI is installed
@@ -297,6 +301,7 @@ EOF
 	sudo -u www-data wp option update date_format "F j, Y" --allow-root
 	sudo -u www-data wp option update time_format "g:i a" --allow-root
 	sudo -u www-data wp option update rss_use_excerpt 1 --allow-root
+	sudo -u www-data wp option update blog_public 0 --allow-root
 
 	# Install and configure plugins
 	for plugin in "${PLUGINS[@]}"; do
