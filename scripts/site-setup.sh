@@ -261,12 +261,12 @@ EOF
 		WP_URL="https://$LOCALDOMAIN"
 		PLUGINS=(
 			"aryo-activity-log"
-			"post-smtp" "redirection"
+			"post-smtp"
+			"redirection"
 			"wordpress-seo"
 			"duplicate-post"
 			"simple-custom-post-order"
 			"tinymce-advanced"
-			"html-editor-syntax-highlighter"
 			"ewww-image-optimizer"
 			"w3-total-cache"
 			"wordfence"
@@ -316,6 +316,7 @@ EOF
 			sudo -u www-data wp plugin install $plugin --activate --allow-root
 		done
 
+		# Lyquix theme
 		# Get the latest commit hash for the specified branch
 		THEME_DOWNLOAD_URL=$(curl -s "https://api.github.com/repos/Lyquix/wp_theme_lyquix/releases/latest" | grep -oP '"zipball_url": "\K[^"]+' | head -1)
 
@@ -331,8 +332,24 @@ EOF
 		# Clean up the downloaded ZIP file
 		rm wp_theme_lyquix.zip
 
+		# Lyquix child theme
+		# Get the latest commit hash for the specified branch
+		THEME_DOWNLOAD_URL=$(curl -s "https://api.github.com/repos/Lyquix/wp_theme_lyquix_child/releases/latest" | grep -oP '"zipball_url": "\K[^"]+' | head -1)
+
+		# Download the ZIP file
+		curl -L -o wp_theme_lyquix_child.zip $THEME_DOWNLOAD_URL
+
+		# Extract the ZIP file to the target directory
+		sudo -u www-data unzip -q wp_theme_lyquix_child.zip -d /srv/www/$PRODDOMAIN/public_html/wp-content/themes
+
+		# Move the extracted folder to the target directory
+		mv /srv/www/$PRODDOMAIN/public_html/wp-content/themes/*wp_theme_lyquix_child* /srv/www/$PRODDOMAIN/public_html/wp-content/themes/lyquix_child
+
+		# Clean up the downloaded ZIP file
+		rm wp_theme_lyquix_child.zip
+
 		# Activate the theme
-		sudo -u www-data wp theme activate lyquix --allow-root
+		sudo -u www-data wp theme activate lyquix_child --allow-root
 
 		# Remove default themes
 		sudo -u www-data wp theme delete twentytwentyfour --allow-root
