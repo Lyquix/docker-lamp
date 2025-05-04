@@ -391,13 +391,13 @@ EOF
 		# Update wp-config.php
 		echo "Updating table prefix in wp-config.php..."
 		FIND="\$table_prefix = 'wp_';"
-		REPLACE="\$table_prefix = '$WP_DB_PREFIX'"
+		REPLACE="\$table_prefix = '$WP_DB_PREFIX';"
 		perl -pi -e "s/\Q$FIND/\E$REPLACE/m" /srv/www/$PRODDOMAIN/public_html/wp-config.php
 
 		# Update wp-secrets.php
 		echo "Updating database name in wp-secrets.php..."
 		FIND="'local' => 'dbname'"
-		REPLACE="'local' => '$DBNAME';"
+		REPLACE="'local' => '$DBNAME'"
 		perl -pi -e "s/$FIND/$REPLACE/m" /srv/www/$PRODDOMAIN/public_html/wp-secrets.php
 
 		# Reset ACF Options for Gutenberg blocks
