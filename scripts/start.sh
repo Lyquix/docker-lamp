@@ -17,12 +17,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-# Check if the script is being run in Docker
-if ! grep -q docker /proc/1/cgroup; then
-	printf "This script must be run in the Docker terminal\n"
-	exit
-fi
-
 # Function to check if a directory is mounted
 function check_directory_mounted {
 	while true; do
@@ -88,4 +82,4 @@ else
 fi
 
 # Prevent the container from exiting by tailing a log file
-tail -f /var/log/apache2/access.log
+tail -f /var/log/apache2/error.log

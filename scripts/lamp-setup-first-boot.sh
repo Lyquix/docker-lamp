@@ -6,12 +6,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-# Check if the script is being run in Docker
-if ! grep -q docker /proc/1/cgroup; then
-	printf "This script must be run in the Docker terminal\n"
-	exit
-fi
-
 DIVIDER="\n***************************************\n\n"
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
@@ -80,7 +74,7 @@ rm -rf /run/mysqld/*
 service mysql start
 
 # Create dbuser
-mysql -u root -e "CREATE USER 'dbuser'@localhost IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@localhost;"
+mysql -u root -e "CREATE USER 'dbuser'@% IDENTIFIED BY 'dbpassword'; GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@%;"
 printf "You can connect to the database with\n\tuser: dbuser\n\tpassword: dbpassword\n"
 
 

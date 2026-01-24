@@ -20,12 +20,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-# Check if the script is being run in Docker
-if ! grep -q docker /proc/1/cgroup; then
-	echo "This script must be run in the Docker terminal"
-	exit
-fi
-
 DIVIDER="\n***************************************\n\n"
 
 # Welcome and instructions

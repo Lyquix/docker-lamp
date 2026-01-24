@@ -6,12 +6,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-# Check if the script is being run in Docker
-if ! grep -q docker /proc/1/cgroup; then
-	printf "This script must be run in the Docker terminal\n"
-	exit
-fi
-
 DIVIDER="\n***************************************\n\n"
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
@@ -243,16 +237,6 @@ FIND="\['host'\] = 'localhost'"
 REPLACE="['host'] = '127.0.0.1'"
 perl -pi -e "s/$FIND/$REPLACE/m" config.inc.php
 printf "You can access phpMyAdmin at\n\thttp://localhost/pma\n"
-
-# Search-Replace DB
-cd /var/www/html
-curl -L https://github.com/interconnectit/Search-Replace-DB/archive/refs/tags/3.1.zip --output srdb.zip
-unzip -q srdb.zip
-mv Search-Replace-DB-3.1 srdb
-rm srdb.zip
-cd srdb
-sed -i '196s/()/("", "dbuser", "dbpassword", "127.0.0.1", "3306", "", "")/' index.php
-printf "You can access Search-Replace-DB at\n\thttp://localhost/srdb\n"
 
 # Initial file permissions
 chown -R www-data:www-data /srv/www

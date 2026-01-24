@@ -17,12 +17,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-# Check if the script is being run in Docker
-if ! grep -q docker /proc/1/cgroup; then
-	printf "This script must be run in the Docker terminal\n"
-	exit
-fi
-
 DIVIDER="\n***************************************\n\n"
 CURRDIR="${PWD}"
 cd "$(dirname "${BASH_SOURCE[0]}")"
