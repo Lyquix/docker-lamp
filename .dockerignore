@@ -1,0 +1,13 @@
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Per-version runtime data
+ubuntu*/
+
+# Logs
+*.log
