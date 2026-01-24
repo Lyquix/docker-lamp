@@ -81,7 +81,7 @@ Setup Container
         ```
     *  Download and install NVM ([Node Version Manager](https://github.com/nvm-sh/nvm)) to switch between NodeJS versions as needed
         ```
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -94,7 +94,7 @@ Setup Container
     *  Clone the Lyquix Docker LAMP repository
         ```
         sudo apt install git
-        git config core.fileMode false
+        git config --global core.fileMode false
         git clone https://github.com/Lyquix/docker-lamp.git Docker
         ```
     *  Execute the container setup script
@@ -129,8 +129,6 @@ Important notes about this LAMP setup:
 *  You must use host '127.0.0.1' to connect to MySQL, do not use 'localhost'.
 *  phpMyAdmin has been installed and configured to login automatically
     [http://localhost/pma](http://localhost/pma)
-*  Search-Replace DB has been installed and configured to login automatically
-    [http://localhost/srdb](http://localhost/srdb)
 *  A custom CA (certificate authority) root certificate is created in `Docker/ssl`. This is used to create SSL certificates for the local sites. Follow the instructions above to add the CA root certificate to Windows and be able to connect to your local sites with HTTPS without any warnings.
 
 
