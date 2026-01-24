@@ -37,7 +37,7 @@ echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
-PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php-xdebug" "php7.2-dev" "libapache2-mod-php7.2" "composer")
+PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.2" "php7.2-common" "php7.2-gd" "php7.2-imap" "php7.2-mysql" "php7.2-mysqli" "php7.2-cli" "php7.2-cgi" "php7.2-fpm" "php7.2-zip" "php-pear" "php-imagick" "php7.2-curl" "php7.2-mbstring" "php7.2-bcmath" "php7.2-xml" "php7.2-soap" "php7.2-opcache" "php7.2-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php-xdebug" "php7.2-dev" "libapache2-mod-php7.2" "composer" "php-xdebug")
 apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
@@ -221,6 +221,10 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.2/fpm/php.ini
 printf "Restarting PHP-FPM and Apache...\n"
 service php7.2-fpm start
 service apache2 restart
+
+# phpinfo page
+echo "<?php phpinfo(); ?>" >/var/www/html/phpinfo.php
+printf "You can access PHPinfo at\n\thttp://localhost/phpinfo.php\n"
 
 # phpMyAdmin
 cd /var/www/html/

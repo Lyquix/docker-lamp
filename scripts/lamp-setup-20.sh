@@ -37,7 +37,7 @@ echo "America/New_York" >/etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 
 printf "Install software...\n"
-PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.4" "php7.4-common" "php7.4-gd" "php7.4-imap" "php7.4-mysql" "php7.4-mysqli" "php7.4-cli" "php7.4-cgi" "php7.4-fpm" "php7.4-zip" "php-pear" "php-imagick" "php7.4-curl" "php7.4-mbstring" "php7.4-bcmath" "php7.4-xml" "php7.4-soap" "php7.4-opcache" "php7.4-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php-xdebug" "php7.4-dev" "libapache2-mod-php7.4" "composer")
+PCKGS=("curl" "vim" "openssl" "git" "zip" "unzip" "libcurl3-openssl-dev" "psmisc" "build-essential" "zlib1g-dev" "libpcre3" "libpcre3-dev" "software-properties-common" "apache2" "libapache2-mod-php" "libapache2-mod-fcgid" "mcrypt" "imagemagick" "php7.4" "php7.4-common" "php7.4-gd" "php7.4-imap" "php7.4-mysql" "php7.4-mysqli" "php7.4-cli" "php7.4-cgi" "php7.4-fpm" "php7.4-zip" "php-pear" "php-imagick" "php7.4-curl" "php7.4-mbstring" "php7.4-bcmath" "php7.4-xml" "php7.4-soap" "php7.4-opcache" "php7.4-intl" "php-apcu" "php-mail" "php-mail-mime" "php-all-dev" "php-xdebug" "php7.4-dev" "libapache2-mod-php7.4" "composer" "php-xdebug")
 apt-fast -y -q --no-install-recommends install ${PCKGS[@]}
 
 # APACHE configuration
@@ -219,6 +219,10 @@ perl -pi -e "s/$FIND/$REPLACE/m" /etc/php/7.4/fpm/php.ini
 printf "Restarting PHP-FPM and Apache...\n"
 service php7.4-fpm start
 service apache2 restart
+
+# phpinfo page
+echo "<?php phpinfo(); ?>" >/var/www/html/phpinfo.php
+printf "You can access PHPinfo at\n\thttp://localhost/phpinfo.php\n"
 
 # phpMyAdmin
 cd /var/www/html/
