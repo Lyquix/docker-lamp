@@ -1,0 +1,42 @@
+{
+  "editor.insertSpaces": false,
+  "editor.tabSize": 2,
+  "editor.rulers": [120],
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[php]": { "editor.defaultFormatter": "valeryanm.vscode-phpsab" },
+  "[xml]": { "editor.defaultFormatter": "redhat.vscode-xml" },
+  "[shellscript]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
+  "[dockerfile]": { "editor.defaultFormatter": "foxundermoon.shell-format" },
+
+  "prettier.printWidth": 120,
+  "prettier.useTabs": true,
+  "prettier.tabWidth": 2,
+  "prettier.singleQuote": true,
+  "prettier.endOfLine": "lf",
+  "prettier.requireConfig": false,
+
+  "eslint.enable": true,
+  "eslint.run": "onSave",
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.format.enable": false
+}
+

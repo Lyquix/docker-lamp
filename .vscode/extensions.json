@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    "valeryanm.vscode-phpsab",
+    "redhat.vscode-xml",
+    "foxundermoon.shell-format",
+
+    "aaron-bond.better-comments",
+    "eamodio.gitlens",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "nhoizey.gremlins",
+    "ritwickdey.liveserver",
+		"zwyx.remotetrash"
+  ],
+  "unwantedRecommendations": []
+}

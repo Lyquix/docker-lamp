@@ -56,6 +56,33 @@ Notes:
 *  You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window: `\\wsl.localhost\Ubuntu`
 *  If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command: `wsl -unregister Ubuntu`
 
+Update Ubuntu
+-------------
+
+Open the Ubuntu terminal and execute the following:
+
+```
+sudo apt update
+sudo apt -y upgrade
+```
+
+Add Trash functionality to WSL
+------------------------------
+
+```
+sudo apt -y install trash-cli
+```
+
+Configure Git in Ubuntu
+-----------------------
+
+Open the Ubuntu terminal and execute the following:
+
+```
+sudo git config --global core.autocrlf false
+sudo git config --global core.preloadindex true
+sudo git config --global feature.manyFiles true
+```
 
 Docker Desktop for Windows
 --------------------------
@@ -132,19 +159,33 @@ Important notes about this LAMP setup:
 *  A custom CA (certificate authority) root certificate is created in `Docker/ssl`. This is used to create SSL certificates for the local sites. Follow the instructions above to add the CA root certificate to Windows and be able to connect to your local sites with HTTPS without any warnings.
 
 
-Set VSCode to use Ubutu as Default Terminal
--------------------------------------------
+Install and configure Visual Studio Code
+----------------------------------------
 
-NodeJS and the scripts used to compile JS and CSS will be running on the Ubuntu WSL machine
+Download and install Visual Studio code from https://apps.microsoft.com/detail/xp9khm4bk9fz7q.
 
-*  Open VSCode
-    *  Press `Ctrl + Shift + P` to open the Command Palette
-    *  Type `terminal default profile` and click on the one result
-    *  Select "Ubuntu (WSL)" as the default terminal
+*  Open Visual Studio Code and install the WSL extension (search for `ms-vscode-remote.remote-wsl`). Close Visual Studio Code.
+*  Open the Ubuntu terminal and run `cd /home/ubuntu/Docker && code .` to run VSCode from WSL for the first time.
+*  Create a new link in the Start menu by opening a Command Prompt terminal and running `wsl.exe -d Ubuntu -- cp "/home/ubuntu/Docker/Visual Studio WSL.lnk" "/mnt/c/Users/%USERNAME%/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/"`.
+*  Pin the link to the Start menu:
+   *   Open the Start menu
+   *   Search for *Visual Studio Code WSL*
+   *   Click *Preview* to show to context menu
+   *   Click *Pin to Start*
+*  Pin the link to the Taskbar by dragging the icon from the Start Menu to the Taskbar
+*  **VSCode Extensions**: go to the Extensions bar and install all the extensions in the *Recommended* group.
+*  **VSCode Settings**:
+   *  Open `.vscode/settings.json` and copy the contents
+   *  Press `Ctrl + Shift + P` to open the Command Palette
+   *  Search `Preferences: Open User Settings (JSON)`
+   *  Paste the contents and save
 
-
-Update configuration of Git in Windows
+Install and configure Git in Windows
 --------------------------------------
+
+Download and install Git for Windows from https://git-scm.com/install/windows. You can leave the default settings presented during the install process, except for **Checkout as-is, commit as-is** (Git will not perform any file line endings conversions).
+
+Restart Windows after installing Git.
 
 The default Git configuration provides very poor performance when accessing repos in WSL. To improve the performance of Git operations perform the following steps:
 
@@ -155,6 +196,8 @@ The default Git configuration provides very poor performance when accessing repo
    git config --system core.longpaths true
    git config --system core.checkStat minimal
    git config --system core.trustctime false
+   git config --global core.preloadindex true
+   git config --global feature.manyFiles true
    ```
 
 
