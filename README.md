@@ -56,7 +56,7 @@ Notes:
 *  You can access the entire WSL Ubuntu filesystem by looking for the Linux section in Windows Explorer. If you cannot find this, use the following URL in the Windows Explorer window: `\\wsl.localhost\Ubuntu`
 *  If you ever need to uninstall Ubuntu and reinstall you can remove the app by right-clicking the icon and clicking uninstall, and after that run the following command: `wsl -unregister Ubuntu`
 
-Update Ubuntu
+Update Ubuntu and Install Additional Utilities
 -------------
 
 Open the Ubuntu terminal and execute the following:
@@ -64,13 +64,7 @@ Open the Ubuntu terminal and execute the following:
 ```
 sudo apt update
 sudo apt -y upgrade
-```
-
-Add Trash functionality to WSL
-------------------------------
-
-```
-sudo apt -y install trash-cli
+sudo apt -y install trash-cli unzip
 ```
 
 Configure Git in Ubuntu
@@ -114,6 +108,11 @@ Setup Container
         [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
         nvm install --lts
         ```
+    *  Download and install Bun
+       ```
+       curl -fsSL https://bun.com/install | bash
+       source /home/ubuntu/.bashrc
+       ```
     *  Create the Docker folder
         ```
         mkdir /home/ubuntu/Docker
