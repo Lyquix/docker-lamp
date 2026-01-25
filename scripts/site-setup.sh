@@ -454,7 +454,7 @@ fi
 printf $DIVIDER
 echo "Open the theme in VSCode:"
 UBUNTU_VERSION=$(lsb_release -r | awk '{print $2}' | cut -d'.' -f1)
-echo "    \\\\wsl.localhost\\Ubuntu\\home\\ubuntu\\Docker\\ubuntu$UBUNTU_VERSION\\www\\$PRODDOMAIN\\public_html\\wp-content\\themes\\lyquix"
+echo "    \\\\wsl.localhost\\Ubuntu\\home\\ubuntu\\Docker\\ubuntu$UBUNTU_VERSION\\www\\$PRODDOMAIN\\public_html\\wp-content\\themes\\lyquix_child"
 echo "Open the WSL terminal in VSCode and finish the theme installation"
 echo "    bun install"
 echo "    chmod +x ./postinstall.sh"
