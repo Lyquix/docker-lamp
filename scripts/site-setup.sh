@@ -337,13 +337,13 @@ EOF
 		sudo -u www-data unzip -q wp_theme_lyquix_child.zip -d /srv/www/$PRODDOMAIN/public_html/wp-content/themes
 
 		# Move the extracted folder to the target directory
-		mv /srv/www/$PRODDOMAIN/public_html/wp-content/themes/*wp_theme_lyquix_child* /srv/www/$PRODDOMAIN/public_html/wp-content/themes/lyquix_child
+		mv /srv/www/$PRODDOMAIN/public_html/wp-content/themes/*wp_theme_lyquix_child* /srv/www/$PRODDOMAIN/public_html/wp-content/themes/lyquix-child
 
 		# Clean up the downloaded ZIP file
 		rm wp_theme_lyquix_child.zip
 
 		# Activate the theme
-		sudo -u www-data wp theme activate lyquix_child --allow-root
+		sudo -u www-data wp theme activate lyquix-child --allow-root
 
 		# Remove default themes
 		sudo -u www-data wp theme delete twentytwentyfour --allow-root
@@ -454,7 +454,7 @@ fi
 printf $DIVIDER
 echo "Open the theme in VSCode:"
 UBUNTU_VERSION=$(lsb_release -r | awk '{print $2}' | cut -d'.' -f1)
-echo "    \\\\wsl.localhost\\Ubuntu\\home\\ubuntu\\Docker\\ubuntu$UBUNTU_VERSION\\www\\$PRODDOMAIN\\public_html\\wp-content\\themes\\lyquix_child"
+echo "    \\\\wsl.localhost\\Ubuntu\\home\\ubuntu\\Docker\\ubuntu$UBUNTU_VERSION\\www\\$PRODDOMAIN\\public_html\\wp-content\\themes\\lyquix-child"
 echo "Open the WSL terminal in VSCode and finish the theme installation"
 echo "    bun install"
 echo "    chmod +x ./postinstall.sh"
